@@ -1,0 +1,8 @@
+<FragScapeModel>
+ <Params crs="epsg:2154" mode="1"/>
+
+ <FragmModel>
+ </FragmModel>
+ <Reporting include_cbc="False">
+ </Reporting>
+</FragScapeModel>
