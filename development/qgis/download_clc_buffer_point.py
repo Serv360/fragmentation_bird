@@ -111,7 +111,7 @@ def convert_to_right_format(obj):
     else:
         return obj
 
-def multiple_points_request(esri_geom, clipping=True, countOnly=False):
+def multiple_points_request_without_pagination(esri_geom, clipping=True, countOnly=False): #To use for count only!
     # === 5. Query CORINE Land Cover API ===
     api_url = "https://image.discomap.eea.europa.eu/arcgis/rest/services/Corine/CLC2018_WM/MapServer/0/query"
     esri_geom_copy = copy.deepcopy(esri_geom)
@@ -185,6 +185,86 @@ def multiple_points_request(esri_geom, clipping=True, countOnly=False):
         print(response.text)
     return response
 
+def multiple_points_request(esri_geom, clipping=True):
+    # === Query CORINE Land Cover API ===
+    api_url = "https://image.discomap.eea.europa.eu/arcgis/rest/services/Corine/CLC2018_WM/MapServer/0/query"
+    esri_geom_copy = copy.deepcopy(esri_geom)
+    esri_geom_copy["rings"] = convert_to_right_format(esri_geom_copy["rings"])
+    params = {
+        "where": "1=1",
+        "geometry": json.dumps(esri_geom_copy),
+        "geometryType": "esriGeometryPolygon", #Use of polygon for a more complex shape
+        "inSR": "3035",
+        "spatialRel": "esriSpatialRelIntersects",
+        "outFields": "*",
+        "outSR": "3035",
+        "f": "geojson", #
+        "returnCountOnly": "False",
+        "resultRecordCount": 1000,
+        "resultOffset": 0
+    }
+    
+    features = []
+    offset = 0
+    page_size = 1000
+
+    while True:
+        params["resultOffset"] = offset
+        response = requests.post(api_url, data=params)
+        if response.status_code == 200:
+            data = response.json()
+        else:
+            print(f"Request failed with status code {response.status_code}")
+            print(response.text)
+            raise ValueError("Status code is wrong")
+        
+        if "features" not in data or not data["features"]:
+            break  # No more data
+
+        features.extend(data["features"])
+        offset += page_size
+
+    # === Clip if true ===
+    if clipping:
+        rings = esri_geom["rings"]
+        clip_polygon = Polygon(rings[0]) if len(rings) == 1 else MultiPolygon(rings)
+        clipped_features = []
+
+        for feat in features:
+            geom = shape(feat['geometry'])  # GeoJSON to Shapely shape
+            clipped_geom = geom.intersection(clip_polygon)  # clip geometry
+            
+            # Only keep features with non-empty intersection
+            if not clipped_geom.is_empty:
+                # Update geometry with clipped geometry
+                feat['geometry'] = mapping(clipped_geom)
+                clipped_features.append(feat)
+            to_add=clipped_features
+    else:
+        to_add=features
+        
+        
+    # === Save full final response ===
+    gdf = gpd.GeoDataFrame.from_features(to_add, crs="EPSG:3035")
+    output_file = "clc2018_irregular_area.gpkg"
+    gdf.to_file(output_file, driver="GPKG")
+
+    print(f"CLC data successfully saved to {output_file}")
+
+    # === Add to QGIS project ===
+    try:
+        from qgis.core import QgsProject, QgsVectorLayer
+        layer = QgsVectorLayer(output_file, "CLC2018_Buffered_Area", "ogr")
+        if layer.isValid():
+            QgsProject.instance().addMapLayer(layer)
+            print("Layer added to current QGIS project.")
+        else:
+            print("Layer is not valid and could not be added.")
+    except ImportError:
+        print("QGIS environment not detected. Skipping layer addition.")
+
+    return response
+
 def create_layer(given_shape, esri_format=True):
     if esri_format:
         rings = given_shape["rings"]
@@ -206,4 +286,4 @@ def create_layer(given_shape, esri_format=True):
         print("Failed to load layer into QGIS.")
 
 esri_geom = multiple_points_shape(points, buffer_radius)
-response = multiple_points_request(esri_geom, countOnly=True)
+response = multiple_points_request(esri_geom, clipping=True)
