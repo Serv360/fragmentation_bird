@@ -6,15 +6,6 @@ from pyproj import Transformer
 import json
 import copy
 
-# Define the point of interest (longitude, latitude)
-lon, lat = 2.9256, 47.4125  # Example coordinates in ESPG:4326 !
-buffer_radius = 5000  # in meters
-points = [
-    (2.556 + i, 47.4125 + j)
-    for i in [k*0.2 for k in range(10)]
-    for j in [k*0.2 for k in range(10)]
-]
-
 def single_point_shape(lon, lat, buffer_radius):
     # Create a point geometry
     # shapely does not assume any coordinate reference system
@@ -285,5 +276,3 @@ def create_layer(given_shape, esri_format=True):
     else:
         print("Failed to load layer into QGIS.")
 
-esri_geom = multiple_points_shape(points, buffer_radius)
-response = multiple_points_request(esri_geom, clipping=True)
