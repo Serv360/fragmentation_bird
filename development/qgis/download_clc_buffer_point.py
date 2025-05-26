@@ -10,9 +10,9 @@ import copy
 lon, lat = 2.9256, 47.4125  # Example coordinates in ESPG:4326 !
 buffer_radius = 5000  # in meters
 points = [
-    (2.8856, 47.4125),
-    (3.0800, 47.4200),
-    (2.9500, 47.4000)
+    (2.556 + i, 47.4125 + j)
+    for i in [k*0.2 for k in range(10)]
+    for j in [k*0.2 for k in range(10)]
 ]
 
 def single_point_shape(lon, lat, buffer_radius):
@@ -106,9 +106,12 @@ def convert_to_lists(obj):
         
 def convert_to_right_format(obj):
     obj = convert_to_lists(obj)
-    return [el[0] for el in obj]
+    if len(obj) > 1:
+        return [el[0] for el in obj]
+    else:
+        return obj
 
-def multiple_points_request(esri_geom, clipping=True):
+def multiple_points_request(esri_geom, clipping=True, countOnly=False):
     # === 5. Query CORINE Land Cover API ===
     api_url = "https://image.discomap.eea.europa.eu/arcgis/rest/services/Corine/CLC2018_WM/MapServer/0/query"
     esri_geom_copy = copy.deepcopy(esri_geom)
@@ -121,11 +124,18 @@ def multiple_points_request(esri_geom, clipping=True):
         "spatialRel": "esriSpatialRelIntersects",
         "outFields": "*",
         "outSR": "3035",
-        "f": "geojson" #"returnCountOnly" = ""
+        "f": "geojson", #
+        "returnCountOnly": str(countOnly),
+        "resultRecordCount": 1000,
+        "resultOffset": 0
     }
-
-    response = requests.get(api_url, params=params)
-    print(response.json())
+    
+    response = requests.post(api_url, data=params)
+    
+    if countOnly:
+        return response
+    print(response.status_code)
+    #print(response.json())
     # === 6. Handle response and save ===
     if response.status_code == 200:
         data = response.json()
@@ -196,4 +206,4 @@ def create_layer(given_shape, esri_format=True):
         print("Failed to load layer into QGIS.")
 
 esri_geom = multiple_points_shape(points, buffer_radius)
-response = multiple_points_request(esri_geom)
+response = multiple_points_request(esri_geom, countOnly=True)
