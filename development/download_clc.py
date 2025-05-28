@@ -5,6 +5,7 @@ from shapely.ops import transform, unary_union
 from pyproj import Transformer
 import json
 import copy
+from qgis.core import QgsProject, QgsVectorLayer, QgsApplication
 
 def single_point_shape(lon, lat, buffer_radius):
     # Create a point geometry
@@ -21,7 +22,7 @@ def single_point_shape(lon, lat, buffer_radius):
     minx, miny, maxx, maxy = buffer_3035.bounds
     return minx, miny, maxx, maxy
     
-def single_point_request():
+def single_point_request(minx, miny, maxx, maxy):
     # Define the REST API endpoint
     api_url = "https://image.discomap.eea.europa.eu/arcgis/rest/services/Corine/CLC2018_WM/MapServer/0/query"
     # Define the parameters for the GET request
@@ -49,17 +50,12 @@ def single_point_request():
         
         print(f"Data successfully saved to {output_file}")
         
-        # Optional: Add the layer to the current QGIS project
-        try:
-            from qgis.core import QgsProject, QgsVectorLayer
-            layer = QgsVectorLayer(output_file, "CLC2018_5km_Buffer", "ogr")
-            if layer.isValid():
-                QgsProject.instance().addMapLayer(layer)
-                print("Layer added to QGIS project.")
-            else:
-                print("Failed to load the layer into QGIS.")
-        except ImportError:
-            print("QGIS environment not detected. Skipping layer addition.")
+        layer = QgsVectorLayer(output_file, "CLC2018_5km_Buffer", "ogr")
+        if layer.isValid():
+            QgsProject.instance().addMapLayer(layer)
+            print("Layer added to QGIS project.")
+        else:
+            print("Failed to load the layer into QGIS.")
     else:
         print(f"Request failed with status code {response.status_code}")
 
@@ -243,16 +239,21 @@ def multiple_points_request(esri_geom, clipping=True):
     print(f"CLC data successfully saved to {output_file}")
 
     # === Add to QGIS project ===
-    try:
-        from qgis.core import QgsProject, QgsVectorLayer
-        layer = QgsVectorLayer(output_file, "CLC2018_Buffered_Area", "ogr")
-        if layer.isValid():
-            QgsProject.instance().addMapLayer(layer)
-            print("Layer added to current QGIS project.")
-        else:
-            print("Layer is not valid and could not be added.")
-    except ImportError:
-        print("QGIS environment not detected. Skipping layer addition.")
+    QGIS_PREFIX_PATH = "C:/Program Files/QGIS 3.34.14"
+    QgsApplication.setPrefixPath(QGIS_PREFIX_PATH, True)
+    qgs = QgsApplication([], False)
+    qgs.initQgis()
+    project = QgsProject.instance()
+    project.read("C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/code/fragmentation_bird/development/qgis/fragmentation.qgz")
+    print("Loaded project:", project.fileName())
+    layer = QgsVectorLayer(output_file, "CLC2018_Buffered_Area", "ogr")
+    if layer.isValid():
+        project.addMapLayer(layer)
+        project.write()
+        print("Layer added to current QGIS project.")
+        qgs.exitQgis()
+    else:
+        print("Layer is not valid and could not be added.")
 
     return response
 
@@ -269,9 +270,19 @@ def create_layer(given_shape, esri_format=True):
     temp_file = "temp_buffer_layer.gpkg"  # Adjust this path
     gdf.to_file(temp_file, layer="buffer_zone", driver="GPKG")
     # 4. Load into QGIS (only works if run inside QGIS Python environment)
+    QGIS_PREFIX_PATH = "C:/Program Files/QGIS 3.34.14"
+    QgsApplication.setPrefixPath(QGIS_PREFIX_PATH, True)
+    qgs = QgsApplication([], False)
+    qgs.initQgis()
+    project = QgsProject.instance()
+    project.read("C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/code/fragmentation_bird/development/qgis/fragmentation.qgz")
+    print("Loaded project:", project.fileName())
     layer = QgsVectorLayer(temp_file, "Buffer Zone", "ogr")
     if layer.isValid():
-        QgsProject.instance().addMapLayer(layer)
+        project.addMapLayer(layer)
+        project.write()
+        print("Layer added to current QGIS project.")
+        qgs.exitQgis()
         print("Buffer layer added to QGIS.")
     else:
         print("Failed to load layer into QGIS.")

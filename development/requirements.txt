@@ -4,3 +4,4 @@ shapely
 pyproj
 json
 copy
+qgis
