@@ -9,9 +9,17 @@ compute_category_indicators <- function(bird_data, traits_data) {
     left_join(traits_data, by = "pk_species") %>%
     filter(!is.na(habitat_specialisation))  # remove unmatched species
   
+  # Create one version with habitat category and one without (labeled "all")
+  birds_with_category <- birds_joined %>% filter(!is.na(habitat_specialisation))
+  birds_all <- birds_joined %>%
+    mutate(habitat_specialisation = "all")
+  
+  # Combine both
+  combined <- bind_rows(birds_with_category, birds_all)
+  
   # Aggregate abundance by site-year-category-species
-  agg <- birds_joined %>%
-    group_by(site, annee, habitat_specialisation, pk_species) %>%
+  agg <- combined %>%
+    group_by(site, annee, habitat_specialisation, pk_species) %>% #Probably not necessary
     summarise(abundance = sum(abondance), .groups = "drop")
   
   # Reshape to wide format per category
@@ -36,6 +44,9 @@ compute_category_indicators <- function(bird_data, traits_data) {
         Simpson_Diversity = diversity(data, index = "simpson")
       )
     })
+  
+  wide <- agg %>%
+    pivot_wider(names_from = pk_species, values_from = abundance, values_fill = 0)
   
   return(indicators_list)
 }
