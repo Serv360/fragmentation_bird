@@ -64,7 +64,7 @@ load_data <- function(bird_path, species_path) {
     ))
   
   bird_data <- bird_data %>%
-    filter(passage == "OK_1_and_2") # Keeps only (site, year) with 2 passages
+    filter(passage == "OK_1_and_2") # Keeps only (site, year) with 2 surveys
   
   return(list(bird = bird_data, traits = traits_data))
 }
