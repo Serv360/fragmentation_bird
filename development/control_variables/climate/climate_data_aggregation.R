@@ -4,8 +4,16 @@ library(ncdf4)
 library(readr)
 library(dplyr)
 
-# Get the extension of a .nc file.
+#=====# Climate data information #=====#
+
+# Climate data was downloaded by hand with macros from the Copernicus website.
+# It would be more relevant to use an API (package cdsapi with python e.g.).
+# A query example is provided in the development folder.
+
+#=====# Functions #=====#
+
 get_box <- function(r) {
+  # Get the extension of a .nc file
   ext <- ext(r)
   
   # Get coordinate boundaries
@@ -16,7 +24,6 @@ get_box <- function(r) {
   
   return(list(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax))
 }
-
 # r <- rast("C:/Users/Serv3/Desktop/INSEE ENSAE/Cours/DSSS project/data/copernicus_propre/temperature/moyenne24h/2010/20100101.nc")
 # res <- get_box(r)
 # In my case: x:-4.95;9.05  y:40.45;52.95
@@ -118,33 +125,24 @@ create_climate_annual_dataset <- function(var_clims, years, climate_data_size, c
   return(climate_tibble)
 }
 
-load_bird_data <- function(bird_path) {
-  bird_data <- read.csv(bird_path, sep = ",")
-
-  bird_data <- bird_data %>%
-    select(site, annee, longitude, latitude, passage) %>% 
-    distinct() %>%
-    filter(passage == "OK_1_and_2") # Keeps only (site, year) with 2 surveys
-  
-  return(bird_data)
-}
-
 write_climate_annual_data <- function(climate_tibble, output_path) {
   readr::write_csv(climate_tibble, output_path)
 }
 
+#=====# Global variables #=====#
+
 data_climate_path <- "C:/Users/Serv3/Desktop/INSEE ENSAE/Cours/DSSS project"
-bird_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/countingdata_2007_2023.csv"
 var_clims = list("temperature_moyenne24h", "precipitation_somme24h", "radiation_somme24h")
 years = seq(2008, 2022)
 corresp_var_clim = list("temperature_moyenne24h" = "Temperature_Air_2m_Mean_24h", 
                         "precipitation_somme24h" = "Precipitation_Flux", 
                         "radiation_somme24h" = "Solar_Radiation_Flux")
+output_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/control_variables/climate/climate_data.csv"
 
-bird_data <- load_bird_data(bird_path)
-climate_data_size <- get_size_climate_data(data_climate_path, var_clims)
+# bird_data <- load_bird_data(bird_path)
+# climate_data_size <- get_size_climate_data(data_climate_path, var_clims)
 
-truc_full <- create_climate_annual_dataset(var_clims, years, climate_data_size, corresp_var_clim)
-# truc <- create_climate_annual_subset("temperature_moyenne24h", 2009, climate_data_size, corresp_var_clim)
+# climate_tibble <- create_climate_annual_dataset(var_clims, years, climate_data_size, corresp_var_clim)
+write_climate_annual_data(climate_tibble, output_path)
 
 
