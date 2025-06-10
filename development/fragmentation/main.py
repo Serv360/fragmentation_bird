@@ -12,8 +12,8 @@ points2 = [
 points = [(2.556, 47.4125)]
 bird_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/countingdata_2007_2023.csv"
 
-
-df_points = get_bird_points(bird_path, 2009)
+batch_size = 50
+df_points = get_bird_points(bird_path, 2009)[:batch_size]
 print(df_points)
 list_points = list(zip(df_points['longitude'], df_points['latitude']))
 
