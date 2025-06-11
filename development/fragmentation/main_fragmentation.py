@@ -1,5 +1,6 @@
 from download_clc import multiple_points_shape, multiple_points_request
 from download_clc import write_clc_file, create_layer
+from download_clc import download_clc_year
 from get_points import get_bird_points
 import time
 
@@ -31,41 +32,5 @@ path_clc = "/land_cover/corine_land_cover"
 #                                    project_path=project_path)
 # write_clc_file(gdf, data_path + path_clc + "/" + str(year) + "/test.gpkg")
 
-def download_clc_batch(batch_df, start, buffer_radius, year, project_path, data_path, path_clc, verbose=True):
-    list_batch_points = list(zip(batch_df['longitude'], batch_df['latitude']))
-    if (verbose):print("Constructing shape.")
-    merged_buffer = multiple_points_shape(list_batch_points, buffer_radius)
-    if (verbose):print("Recovering CLC data.")
-    start_timer = time.time()
-    response, gdf = multiple_points_request(merged_buffer,
-                                       year=year,
-                                       clipping=True,
-                                       add_to_project=False, 
-                                       project_path=project_path)
-    end_timer = time.time()
-    diff_timer = end_timer - start_timer
-    if (verbose):print(f"Done. Execution time = {diff_timer}")
-    if (verbose):print("Writing CLC data.")
-    write_clc_file(gdf, data_path + path_clc + "/" + str(year) + f"/batch_clc_{year}_{start}.gpkg")
-
-def download_clc_year(df_points, batch_size, buffer_radius, year, project_path, 
-                    data_path, path_clc, starting_point=0, verbose=True):
-    total_rows = len(df_points)
-    for start in range(0, total_rows, batch_size):
-        if start >= starting_point:
-            if (verbose):print(f"{start}/{total_rows}")
-            end = min(start + batch_size, total_rows)
-            batch_df = df_points.iloc[start:end]
-            download_clc_batch(batch_df, start,
-                        buffer_radius, 
-                        year, 
-                        project_path, 
-                        data_path, 
-                        path_clc,
-                        verbose=True)
-        else:
-            if (verbose):print(f"{start}/{total_rows}")
-            if (verbose):print(f"Already downloaded. Starting point = {starting_point}")
-
 download_clc_year(df_points, batch_size, buffer_radius, year, project_path, 
-                    data_path, path_clc, starting_point=100, verbose=True)
+                    data_path, path_clc, starting_point=0, verbose=True)
