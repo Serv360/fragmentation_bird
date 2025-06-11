@@ -4,9 +4,9 @@ from shapely.geometry import Point
 
 #=====# Functions #=====#
 
-def compute_cover_percentages(points_df, clc_gpkg, clc_to_category_file, year, output_file=None):
+def compute_cover_percentages(points_df, data_clc_path, clc_to_category_file, year, output_file=None):
     # Load land cover buffer polygons
-    clc_gdf = gpd.read_file(clc_gpkg)
+    clc_gdf = gpd.read_file(data_clc_path)
     
     # Ensure common CRS
     clc_gdf = clc_gdf.to_crs("EPSG:4326")
@@ -67,18 +67,18 @@ def load_bird_data(bird_path, year):
     df = df[['site', 'annee', 'longitude', 'latitude']].drop_duplicates()
     return df
 
-
-
 #=====# Global variables #=====#
 
 bird_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/countingdata_2007_2023.csv"
-
+data_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data"
+path_clc = "/land_cover/corine_land_cover"
 
 bird_data = load_bird_data(bird_path, 2008)
 
 df = compute_cover_percentages(
     points_file=bird_data,
-    clc_gpkg="clc_buffers.gpkg",
+    data_clc_path=data_path + path_clc + "/merge",
     clc_to_category_file="clc_to_broad_categories.csv",
+    year=2018,
     output_file="cover_percentages.csv"
 )

@@ -5,60 +5,9 @@ from shapely.ops import transform, unary_union
 from pyproj import Transformer
 import json
 import copy
+import os
+import pandas as pd
 from qgis.core import QgsProject, QgsVectorLayer, QgsApplication
-
-def single_point_shape(lon, lat, buffer_radius):
-    # Create a point geometry
-    # shapely does not assume any coordinate reference system
-    point = Point(lon, lat)
-    # Define coordinate transformations
-    transformer_to_3035 = Transformer.from_crs("EPSG:4326", "EPSG:3035", always_xy=True)
-    # Project the point to EPSG:3035
-    # Now the point is in a reference system
-    point_3035 = transform(transformer_to_3035.transform, point)
-    # Create a buffer around the point
-    buffer_3035 = point_3035.buffer(buffer_radius)
-    # Get the bounding box of the buffer
-    minx, miny, maxx, maxy = buffer_3035.bounds
-    return minx, miny, maxx, maxy
-    
-def single_point_request(minx, miny, maxx, maxy):
-    # Define the REST API endpoint
-    api_url = "https://image.discomap.eea.europa.eu/arcgis/rest/services/Corine/CLC2018_WM/MapServer/0/query"
-    # Define the parameters for the GET request
-    params = {
-        "where": "1=1",
-        "geometry": f"{minx},{miny},{maxx},{maxy}",
-        "geometryType": "esriGeometryEnvelope", #Use of envelope here for a single square shape
-        "inSR": "3035",
-        "spatialRel": "esriSpatialRelIntersects",
-        "outFields": "*",
-        "outSR": "3035",
-        "f": "geojson"
-    }
-    # Send the GET request
-    response = requests.get(api_url, params=params)
-    # Check if the request was successful
-    if response.status_code == 200:
-        # Load the response into a GeoDataFrame
-        data = response.json()
-        gdf = gpd.GeoDataFrame.from_features(data["features"])
-        
-        # Save the data to a GeoPackage file
-        output_file = "clc2018_5km_buffer.gpkg"
-        gdf.to_file(output_file, driver="GPKG")
-        
-        print(f"Data successfully saved to {output_file}")
-        
-        layer = QgsVectorLayer(output_file, "CLC2018_5km_Buffer", "ogr")
-        if layer.isValid():
-            QgsProject.instance().addMapLayer(layer)
-            print("Layer added to QGIS project.")
-        else:
-            print("Failed to load the layer into QGIS.")
-    else:
-        print(f"Request failed with status code {response.status_code}")
-
 
 def multiple_points_shape(points, buffer_radius):
     # Define coordinate transformations
@@ -76,110 +25,38 @@ def multiple_points_shape(points, buffer_radius):
     merged_buffer = unary_union(buffers)
     #print(merged_buffer)
     # === 4. Convert geometry to ESRI JSON ===
+    
+    return merged_buffer
+
+
+def to_esri_geometry(geometry):
+    """Convert a Shapely Polygon or MultiPolygon to ESRI JSON geometry format."""
+    # Force to MultiPolygon for consistency
+    if isinstance(geometry, Polygon):
+        geometry = MultiPolygon([geometry])
+    
+    # Get coordinates from all polygons and flatten to a list of rings
+    rings = []
+    for poly in geometry.geoms:
+        coords = mapping(poly)["coordinates"]
+        rings.extend(coords)  # coords is a list: [exterior, hole1, hole2, ...]
+
+    # Build ESRI geometry
     esri_geom = {
-        "rings": mapping(merged_buffer)["coordinates"],
+        "rings": rings,
         "spatialReference": {"wkid": 3035}
     }
-    
+
     return esri_geom
-    
-def convert_to_lists(obj):
-    if isinstance(obj, tuple):
-        return [convert_to_lists(i) for i in obj]
-    elif isinstance(obj, list):
-        return [convert_to_lists(i) for i in obj]
-    else:
-        return obj
-        
-def convert_to_right_format(obj):
-    obj = convert_to_lists(obj)
-    if len(obj) > 1:
-        return [el[0] for el in obj]
-    else:
-        return obj
 
-def multiple_points_request_without_pagination(esri_geom, clipping=True, countOnly=False): #To use for count only!
-    # === 5. Query CORINE Land Cover API ===
-    api_url = "https://image.discomap.eea.europa.eu/arcgis/rest/services/Corine/CLC2018_WM/MapServer/0/query"
-    esri_geom_copy = copy.deepcopy(esri_geom)
-    esri_geom_copy["rings"] = convert_to_right_format(esri_geom_copy["rings"])
-    params = {
-        "where": "1=1",
-        "geometry": json.dumps(esri_geom_copy),
-        "geometryType": "esriGeometryPolygon", #Use of polygon for a more complex shape
-        "inSR": "3035",
-        "spatialRel": "esriSpatialRelIntersects",
-        "outFields": "*",
-        "outSR": "3035",
-        "f": "geojson", #
-        "returnCountOnly": str(countOnly),
-        "resultRecordCount": 1000,
-        "resultOffset": 0
-    }
-    
-    response = requests.post(api_url, data=params)
-    
-    if countOnly:
-        return response
-    print(response.status_code)
-    #print(response.json())
-    # === 6. Handle response and save ===
-    if response.status_code == 200:
-        data = response.json()
-        
-        if clipping:
-            rings = esri_geom["rings"]
-            clip_polygon = Polygon(rings[0]) if len(rings) == 1 else MultiPolygon(rings)
-            clipped_features = []
 
-            for feat in data["features"]:
-                geom = shape(feat['geometry'])  # GeoJSON to Shapely shape
-                clipped_geom = geom.intersection(clip_polygon)  # clip geometry
-                
-                # Only keep features with non-empty intersection
-                if not clipped_geom.is_empty:
-                    # Update geometry with clipped geometry
-                    feat['geometry'] = mapping(clipped_geom)
-                    clipped_features.append(feat)
-                to_add=clipped_features
-        else:
-            to_add=data["features"]
-        
-        
-        gdf = gpd.GeoDataFrame.from_features(to_add, crs="EPSG:3035")
-        
-        
-            
-        
-        output_file = "clc2018_irregular_area.gpkg"
-        gdf.to_file(output_file, driver="GPKG")
-
-        print(f"CLC data successfully saved to {output_file}")
-
-        # === 7. Optional: Add to QGIS project ===
-        try:
-            from qgis.core import QgsProject, QgsVectorLayer
-            layer = QgsVectorLayer(output_file, "CLC2018_Buffered_Area", "ogr")
-            if layer.isValid():
-                QgsProject.instance().addMapLayer(layer)
-                print("Layer added to current QGIS project.")
-            else:
-                print("Layer is not valid and could not be added.")
-        except ImportError:
-            print("QGIS environment not detected. Skipping layer addition.")
-    else:
-        print(f"Request failed with status code {response.status_code}")
-        print(response.text)
-    return response
-
-def multiple_points_request(esri_geom, clipping=True):
+def multiple_points_request(merged_buffer, year=2018, clipping=True, add_to_project=False, project_path=""):
     # === Query CORINE Land Cover API ===
-    api_url = "https://image.discomap.eea.europa.eu/arcgis/rest/services/Corine/CLC2018_WM/MapServer/0/query"
-    esri_geom_copy = copy.deepcopy(esri_geom)
-    esri_geom_copy["rings"] = convert_to_right_format(esri_geom_copy["rings"])
+    api_url = "https://image.discomap.eea.europa.eu/arcgis/rest/services/Corine/CLC" + str(year) + "_WM/MapServer/0/query"
+    esri_geom = to_esri_geometry(merged_buffer)
     params = {
         "where": "1=1",
-        "geometry": json.dumps(esri_geom_copy),
+        "geometry": json.dumps(esri_geom),
         "geometryType": "esriGeometryPolygon", #Use of polygon for a more complex shape
         "inSR": "3035",
         "spatialRel": "esriSpatialRelIntersects",
@@ -213,8 +90,7 @@ def multiple_points_request(esri_geom, clipping=True):
 
     # === Clip if true ===
     if clipping:
-        rings = esri_geom["rings"]
-        clip_polygon = Polygon(rings[0]) if len(rings) == 1 else MultiPolygon(rings)
+        clip_polygon = merged_buffer
         clipped_features = []
 
         for feat in features:
@@ -226,36 +102,37 @@ def multiple_points_request(esri_geom, clipping=True):
                 # Update geometry with clipped geometry
                 feat['geometry'] = mapping(clipped_geom)
                 clipped_features.append(feat)
-            to_add=clipped_features
+        to_add=clipped_features
     else:
         to_add=features
         
         
-    # === Save full final response ===
+    # === Save full final response (tmp) ===
     gdf = gpd.GeoDataFrame.from_features(to_add, crs="EPSG:3035")
-    output_file = "clc2018_irregular_area.gpkg"
+    output_file = "clc_irregular_area.gpkg"
     gdf.to_file(output_file, driver="GPKG")
 
     print(f"CLC data successfully saved to {output_file}")
 
     # === Add to QGIS project ===
-    QGIS_PREFIX_PATH = "C:/Program Files/QGIS 3.34.14"
-    QgsApplication.setPrefixPath(QGIS_PREFIX_PATH, True)
-    qgs = QgsApplication([], False)
-    qgs.initQgis()
-    project = QgsProject.instance()
-    project.read("C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/code/fragmentation_bird/development/qgis/fragmentation.qgz")
-    print("Loaded project:", project.fileName())
-    layer = QgsVectorLayer(output_file, "CLC2018_Buffered_Area", "ogr")
-    if layer.isValid():
-        project.addMapLayer(layer)
-        project.write()
-        print("Layer added to current QGIS project.")
-        qgs.exitQgis()
-    else:
-        print("Layer is not valid and could not be added.")
+    if add_to_project:
+        QGIS_PREFIX_PATH = "C:/Program Files/QGIS 3.34.14"
+        QgsApplication.setPrefixPath(QGIS_PREFIX_PATH, True)
+        qgs = QgsApplication([], False)
+        qgs.initQgis()
+        project = QgsProject.instance()
+        project.read(project_path)
+        print("Loaded project:", project.fileName())
+        layer = QgsVectorLayer(output_file, "CLC2018_Buffered_Area", "ogr")
+        if layer.isValid():
+            project.addMapLayer(layer)
+            project.write()
+            print("Layer added to current QGIS project.")
+            qgs.exitQgis()
+        else:
+            print("Layer is not valid and could not be added.")
 
-    return response
+    return response, gdf
 
 def create_layer(given_shape, esri_format=True):
     if esri_format:
@@ -287,3 +164,33 @@ def create_layer(given_shape, esri_format=True):
     else:
         print("Failed to load layer into QGIS.")
 
+
+def write_clc_file(clc_file, write_path):
+    clc_file.to_file(write_path, driver="GPKG")
+
+
+def merge_gpkg_files(input_folder, output_file, output_layer="merged_layer", input_layer=None):
+    """
+    Merges all GPKG files in a folder into one GPKG file.
+
+    Parameters:
+        input_folder (str): Path to folder containing GPKG files.
+        output_file (str): Path to the output GPKG file.
+        output_layer (str): Name of the output layer in the GPKG.
+        input_layer (str or None): Name of the input layer to read. If None, uses the first layer in each file.
+    """
+    gpkg_files = [os.path.join(input_folder, f) for f in os.listdir(input_folder) if f.endswith(".gpkg")]
+
+    if not gpkg_files:
+        raise FileNotFoundError("No .gpkg files found in the specified folder.")
+
+    merged_gdfs = []
+
+    for f in gpkg_files:
+        gdf = gpd.read_file(f, layer=input_layer) if input_layer else gpd.read_file(f)
+        merged_gdfs.append(gdf)
+
+    merged_gdf = gpd.GeoDataFrame(pd.concat(merged_gdfs, ignore_index=True), crs=merged_gdfs[0].crs)
+    
+
+    print(f"✅ Merged {len(gpkg_files)} files into {output_file}")
