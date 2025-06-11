@@ -2,15 +2,9 @@ import geopandas as gpd
 import pandas as pd
 from shapely.geometry import Point
 
-def compute_cover_percentages(points_file, clc_gpkg, clc_to_category_file, output_file=None):
-    # Load points
-    points_df = pd.read_csv(points_file) if points_file.endswith('.csv') else gpd.read_file(points_file)
-    if not isinstance(points_df, gpd.GeoDataFrame):
-        points_gdf = gpd.GeoDataFrame(points_df, geometry=gpd.points_from_xy(points_df.lon, points_df.lat), crs="EPSG:4326")
-    else:
-        points_gdf = points_df
-        points_gdf = points_gdf.to_crs("EPSG:4326")
+#=====# Functions #=====#
 
+def compute_cover_percentages(points_df, clc_gpkg, clc_to_category_file, year, output_file=None):
     # Load land cover buffer polygons
     clc_gdf = gpd.read_file(clc_gpkg)
     
@@ -49,7 +43,7 @@ def compute_cover_percentages(points_file, clc_gpkg, clc_to_category_file, outpu
 
         # Compute percentages
         total_area = area_by_category.sum()
-        percentages = (area_by_category / total_area * 100).round(2)
+        percentages = (area_by_category / total_area * 100)
 
         result_row = {
             'point_id': point['point_id'],
@@ -68,11 +62,22 @@ def compute_cover_percentages(points_file, clc_gpkg, clc_to_category_file, outpu
 
     return results_df
 
-def load_bird_data(bird_path):
-    
+def load_bird_data(bird_path, year):
+    df = pd.read_csv(bird_path)
+    df = df[['site', 'annee', 'longitude', 'latitude']].drop_duplicates()
+    return df
+
+
+
+#=====# Global variables #=====#
+
+bird_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/countingdata_2007_2023.csv"
+
+
+bird_data = load_bird_data(bird_path, 2008)
 
 df = compute_cover_percentages(
-    points_file="points.csv",
+    points_file=bird_data,
     clc_gpkg="clc_buffers.gpkg",
     clc_to_category_file="clc_to_broad_categories.csv",
     output_file="cover_percentages.csv"
