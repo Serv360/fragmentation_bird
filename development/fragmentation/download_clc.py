@@ -205,14 +205,13 @@ def write_clc_file(clc_file, write_path):
     clc_file.to_file(write_path, driver="GPKG")
 
 
-def merge_gpkg_files(input_folder, output_file, output_layer="merged_layer", input_layer=None):
+def merge_gpkg_files(input_folder, output_file, input_layer=None):
     """
     Merges all GPKG files in a folder into one GPKG file.
 
     Parameters:
         input_folder (str): Path to folder containing GPKG files.
         output_file (str): Path to the output GPKG file.
-        output_layer (str): Name of the output layer in the GPKG.
         input_layer (str or None): Name of the input layer to read. If None, uses the first layer in each file.
     """
     gpkg_files = [os.path.join(input_folder, f) for f in os.listdir(input_folder) if f.endswith(".gpkg")]
@@ -228,5 +227,6 @@ def merge_gpkg_files(input_folder, output_file, output_layer="merged_layer", inp
 
     merged_gdf = gpd.GeoDataFrame(pd.concat(merged_gdfs, ignore_index=True), crs=merged_gdfs[0].crs)
     
+    merged_gdf.to_file(output_file, driver="GPKG")
 
-    print(f"✅ Merged {len(gpkg_files)} files into {output_file}")
+    print(f"Merged {len(gpkg_files)} files into {output_file}")
