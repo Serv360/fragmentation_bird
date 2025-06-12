@@ -1,6 +1,8 @@
 import geopandas as gpd
 import pandas as pd
 from shapely.geometry import Point
+from shapely.ops import transform
+from pyproj import Transformer
 import os
 
 #=====# Functions #=====#
@@ -11,6 +13,7 @@ def compute_cover_perc_point(clc_gdf, point, data_clc_path, clc_to_category_file
     Output: cover_percentages for a point and a year
     """
     buffer_geom = point.geometry.buffer(buffer_size)  # 5 km buffer
+    buffer_geom = buffer_geom.to_crs("EPSG:3857")
 
     # Intersect with land cover polygons
     intersected = clc_gdf[clc_gdf.geometry.intersects(buffer_geom)].copy()
@@ -25,12 +28,12 @@ def compute_cover_perc_point(clc_gdf, point, data_clc_path, clc_to_category_file
     percentages = (area_by_category / total_area * 100)
 
     result_row = {
-        'point_id': point['point_id'],
         'lon': point.geometry.x,
         'lat': point.geometry.y,
     }
     for cat in range(1, 5):
         result_row[f'perc{cat}'] = percentages.get(cat, 0.0)
+    result_row[f'perc{cat}'] = percentages.get(cat, 0.0)
 
     return result_row
 
@@ -47,7 +50,7 @@ def compute_cover_perc_all(points_df, data_clc_path, clc_to_category_file, year,
     clc_gdf = gpd.read_file(data_clc_path + "/merged/" + f"full_file_{year}.gpkg")
 
     # Load CLC code to broad category mapping
-    clc_map_df = pd.read_csv(clc_to_category_file)
+    clc_map_df = pd.read_csv(clc_to_category_file, sep=";")
     clc_map = dict(zip(clc_map_df['Code_18'], clc_map_df['broad_category']))
 
     # Map CLC codes to broad categories
@@ -58,17 +61,11 @@ def compute_cover_perc_all(points_df, data_clc_path, clc_to_category_file, year,
 
     # Compute area of each polygon (in meters^2)
     clc_gdf = clc_gdf.to_crs("EPSG:3857")  # Use projected CRS for accurate area calculation
-    clc_gdf['area'] = clc_gdf.geometry.area
-
-    # Also project points to the same CRS
-    points_gdf = points_gdf.to_crs("EPSG:3857")
-
-    results = []
-
 
     for i in range(len(points_df)):
+        site = points_df.iloc[i]["site"]
         point = (points_df.iloc[i]["longitude"], points_df.iloc[i]["latitude"])
-        compute_cover_perc_point(clc_gdf,point, data_clc_path, clc_to_category_file, year, buffer_size)
+        compute_cover_perc_point(clc_gdf, point, data_clc_path, clc_to_category_file, year, buffer_size)
     
     results_df = pd.DataFrame(results)
 
@@ -96,7 +93,7 @@ buffer_size = 5000
 year=2018
 
 
-#points_df = get_bird_points(bird_path, 2008, all_years=True)
+points_df = get_bird_points(bird_path, 2008, all_years=True)
 
 # df = compute_cover_perc_all(
 #     points_df,
@@ -106,8 +103,43 @@ year=2018
 #     output_file=habitat_path + "cover_percentages.csv"
 # )
 
-#clc_gdf = gpd.read_file(data_path + path_clc + "/merged/" + f"full_file_{year}.gpkg")
+clc_gdf = gpd.read_file(data_path + path_clc + "/merged/" + f"full_file_{year}.gpkg")
 #print(clc_gdf)
 
-clc_map_df = pd.read_csv(clc_to_category_file)
-print(clc_map_df)
+# clc_map_df = pd.read_csv(clc_to_category_file, sep=";")
+# print(clc_map_df)
+
+# Load CLC code to broad category mapping
+clc_map_df = pd.read_csv(clc_to_category_file, sep=";")
+clc_map = dict(zip(clc_map_df['Code_18'], clc_map_df['broad_category']))
+
+# Map CLC codes to broad categories
+clc_gdf['broad_category'] = clc_gdf['Code_18'].map(clc_map)
+
+# Drop unknown categories
+clc_gdf = clc_gdf.dropna(subset=['broad_category'])
+
+# Compute area of each polygon (in meters^2)
+clc_gdf = clc_gdf.to_crs("EPSG:3857")  # Use projected CRS for accurate area calculation
+
+transformer = Transformer.from_crs("EPSG:4326", "EPSG:3857", always_xy=True)
+
+point = (points_df.iloc[0]["longitude"], points_df.iloc[0]["latitude"])
+point = Point(point)
+point = transform(transformer.transform, point)
+buffer_geom = point.buffer(buffer_size)  # 5 km buffer
+#buffer_geom = buffer_geom.to_crs("EPSG:3857")
+print(buffer_geom)
+# Intersect with land cover polygons
+intersected = clc_gdf[clc_gdf.geometry.intersects(buffer_geom)].copy()
+print(intersected)
+intersected['geometry'] = intersected.geometry.intersection(buffer_geom)
+intersected['area'] = intersected.geometry.area
+
+# Group by broad category and calculate area
+area_by_category = intersected.groupby('broad_category')['area'].sum()
+
+# Compute percentages
+total_area = area_by_category.sum()
+percentages = (area_by_category / total_area * 100)
+print(percentages)
