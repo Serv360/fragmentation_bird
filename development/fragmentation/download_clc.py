@@ -9,6 +9,8 @@ import os
 import pandas as pd
 from qgis.core import QgsProject, QgsVectorLayer, QgsApplication
 import time
+from shapely.strtree import STRtree
+from shapely.geometry import GeometryCollection
 
 def multiple_points_shape(points, buffer_radius):
     # Define coordinate transformations
@@ -205,7 +207,7 @@ def write_clc_file(clc_file, write_path):
     clc_file.to_file(write_path, driver="GPKG")
 
 
-def merge_gpkg_files(input_folder, output_file, input_layer=None):
+def merge_gpkg_files2(input_folder, output_file, input_layer=None):
     """
     Merges all GPKG files in a folder into one GPKG file.
 
@@ -230,3 +232,56 @@ def merge_gpkg_files(input_folder, output_file, input_layer=None):
     merged_gdf.to_file(output_file, driver="GPKG")
 
     print(f"Merged {len(gpkg_files)} files into {output_file}")
+
+
+def merge_gpkg_files(input_folder, output_file, input_layer=None):
+    """
+    Sequentially merges GPKG files from a folder, removing overlapping parts from later files.
+
+    Parameters:
+        input_folder (str): Folder with .gpkg files
+        output_file (str): Output .gpkg path
+        input_layer (str or None): Layer name to read; if None, first layer is used
+    """
+    gpkg_files = sorted([
+        os.path.join(input_folder, f)
+        for f in os.listdir(input_folder)
+        if f.endswith(".gpkg")
+    ])
+
+    if not gpkg_files:
+        raise FileNotFoundError("No .gpkg files found in the specified folder.")
+
+    # Final result dataframe
+    merged_gdf = gpd.GeoDataFrame(columns=["geometry"], geometry="geometry", crs=None)
+    total_union = None  # cumulative geometry
+
+    for idx, fpath in enumerate(gpkg_files):
+        print(f"Processing file {idx+1}/{len(gpkg_files)}: {os.path.basename(fpath)}")
+        gdf = gpd.read_file(fpath, layer=input_layer) if input_layer else gpd.read_file(fpath)
+
+        # Set CRS if not yet set
+        if merged_gdf.crs is None:
+            merged_gdf.set_crs(gdf.crs, inplace=True)
+
+        if total_union is not None:
+            # Subtract already-merged geometries
+            gdf["geometry"] = gdf.geometry.map(
+                lambda geom: geom.difference(total_union) if geom is not None else None
+            )
+
+            # Drop empty geometries
+            gdf = gdf[~gdf.geometry.is_empty & gdf.geometry.notna()]
+
+        # Add non-overlapping geometries to result
+        merged_gdf = pd.concat([merged_gdf, gdf], ignore_index=True)
+
+        # Update the union of all merged geometries
+        if total_union is None:
+            total_union = gdf.unary_union
+        else:
+            total_union = total_union.union(gdf.unary_union)
+
+    # Save final file
+    merged_gdf.to_file(output_file, driver="GPKG")
+    print(f"✅ Merged {len(gpkg_files)} files into '{output_file}' with {len(merged_gdf)} unique features.")
