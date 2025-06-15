@@ -4,6 +4,7 @@ from shapely.geometry import Point
 from shapely.ops import transform
 from pyproj import Transformer
 import os
+from math import ceil
 
 #=====# Functions #=====#
 
@@ -12,8 +13,11 @@ def compute_cover_perc_point(clc_gdf, point, data_clc_path, clc_to_category_file
     Input: current_file, point, year
     Output: cover_percentages for a point and a year
     """
-    buffer_geom = point.geometry.buffer(buffer_size)  # 5 km buffer
-    buffer_geom = buffer_geom.to_crs("EPSG:3857")
+    transformer = Transformer.from_crs("EPSG:4326", "EPSG:3857", always_xy=True)
+
+    point = Point(point)
+    point = transform(transformer.transform, point)
+    buffer_geom = point.buffer(buffer_size)  # 5 km buffer
 
     # Intersect with land cover polygons
     intersected = clc_gdf[clc_gdf.geometry.intersects(buffer_geom)].copy()
@@ -27,19 +31,16 @@ def compute_cover_perc_point(clc_gdf, point, data_clc_path, clc_to_category_file
     total_area = area_by_category.sum()
     percentages = (area_by_category / total_area * 100)
 
-    result_row = {
-        'lon': point.geometry.x,
-        'lat': point.geometry.y,
-    }
+    result_row = {}
     for cat in range(1, 5):
-        result_row[f'perc{cat}'] = percentages.get(cat, 0.0)
-    result_row[f'perc{cat}'] = percentages.get(cat, 0.0)
+        result_row[f'perc{cat}'] = percentages.get(cat, 0.0) # handles missing values and assign 0
+    result_row['surf_tot'] = total_area
 
     return result_row
 
 
 
-def compute_cover_perc_all(points_df, data_clc_path, clc_to_category_file, year, buffer_size, output_file=None):
+def compute_cover_perc_all(points_df, data_clc_path, clc_to_category_file, year, buffer_size, output_folder=None, verbose=False):
     """
     Input: a list of points, should be the unique sites, for which clc data was downloaded in batches of 100
         CLC data is downloaded by scripts in the fragmentation folder.
@@ -51,7 +52,11 @@ def compute_cover_perc_all(points_df, data_clc_path, clc_to_category_file, year,
 
     # Load CLC code to broad category mapping
     clc_map_df = pd.read_csv(clc_to_category_file, sep=";")
+    clc_map_df = clc_map_df.apply(pd.to_numeric)
     clc_map = dict(zip(clc_map_df['Code_18'], clc_map_df['broad_category']))
+
+    # Make sure Code_18 is numeric for clc_gdf 
+    clc_gdf["Code_18"] = pd.to_numeric(clc_gdf["Code_18"], errors='coerce')
 
     # Map CLC codes to broad categories
     clc_gdf['broad_category'] = clc_gdf['Code_18'].map(clc_map)
@@ -59,22 +64,25 @@ def compute_cover_perc_all(points_df, data_clc_path, clc_to_category_file, year,
     # Drop unknown categories
     clc_gdf = clc_gdf.dropna(subset=['broad_category'])
 
-    # Compute area of each polygon (in meters^2)
     clc_gdf = clc_gdf.to_crs("EPSG:3857")  # Use projected CRS for accurate area calculation
 
-    for i in range(len(points_df)):
-        site = points_df.iloc[i]["site"]
-        point = (points_df.iloc[i]["longitude"], points_df.iloc[i]["latitude"])
-        compute_cover_perc_point(clc_gdf, point, data_clc_path, clc_to_category_file, year, buffer_size)
-    
-    results_df = pd.DataFrame(results)
+    results = []
 
-    if output_file:
-        results_df.to_csv(output_file, index=False)
+    if (verbose):print("Start computing percentages")
+
+    for i in range(len(points_df)):
+        if (verbose) and i%(ceil(len(points_df)//10)) == 0:print(f"Computing {i}/{len(points_df)}.")
+        point = (points_df.iloc[i]["longitude"], points_df.iloc[i]["latitude"])
+        result_row = compute_cover_perc_point(clc_gdf, point, data_clc_path, clc_to_category_file, year, buffer_size)
+        result_row["site"] = points_df.iloc[i]["site"]
+        results.append(result_row)
+
+    results_df = pd.DataFrame.from_dict(results)
+
+    if output_folder:
+        results_df.to_csv(output_folder + f"/habitat_control_{year}_{buffer_size}.csv", index=False)
 
     return results_df
-    
-    
 
 def get_bird_points(file_path, year, all_years=False):
     df = pd.read_csv(file_path)
@@ -95,51 +103,12 @@ year=2018
 
 points_df = get_bird_points(bird_path, 2008, all_years=True)
 
-# df = compute_cover_perc_all(
-#     points_df,
-#     data_clc_path=data_path + path_clc,
-#     clc_to_category_file="clc_to_broad_categories.csv",
-#     year=2018,
-#     output_file=habitat_path + "cover_percentages.csv"
-# )
+output = compute_cover_perc_all(points_df, 
+                       data_path + path_clc, 
+                       clc_to_category_file, 
+                       year, 
+                       buffer_size, 
+                       output_folder=data_path + habitat_path, 
+                       verbose=True)
 
-clc_gdf = gpd.read_file(data_path + path_clc + "/merged/" + f"full_file_{year}.gpkg")
-#print(clc_gdf)
-
-# clc_map_df = pd.read_csv(clc_to_category_file, sep=";")
-# print(clc_map_df)
-
-# Load CLC code to broad category mapping
-clc_map_df = pd.read_csv(clc_to_category_file, sep=";")
-clc_map = dict(zip(clc_map_df['Code_18'], clc_map_df['broad_category']))
-
-# Map CLC codes to broad categories
-clc_gdf['broad_category'] = clc_gdf['Code_18'].map(clc_map)
-
-# Drop unknown categories
-clc_gdf = clc_gdf.dropna(subset=['broad_category'])
-
-# Compute area of each polygon (in meters^2)
-clc_gdf = clc_gdf.to_crs("EPSG:3857")  # Use projected CRS for accurate area calculation
-
-transformer = Transformer.from_crs("EPSG:4326", "EPSG:3857", always_xy=True)
-
-point = (points_df.iloc[0]["longitude"], points_df.iloc[0]["latitude"])
-point = Point(point)
-point = transform(transformer.transform, point)
-buffer_geom = point.buffer(buffer_size)  # 5 km buffer
-#buffer_geom = buffer_geom.to_crs("EPSG:3857")
-print(buffer_geom)
-# Intersect with land cover polygons
-intersected = clc_gdf[clc_gdf.geometry.intersects(buffer_geom)].copy()
-print(intersected)
-intersected['geometry'] = intersected.geometry.intersection(buffer_geom)
-intersected['area'] = intersected.geometry.area
-
-# Group by broad category and calculate area
-area_by_category = intersected.groupby('broad_category')['area'].sum()
-
-# Compute percentages
-total_area = area_by_category.sum()
-percentages = (area_by_category / total_area * 100)
-print(percentages)
+print(output)
