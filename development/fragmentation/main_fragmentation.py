@@ -22,7 +22,7 @@ df_points = get_bird_points(bird_path, 2008, all_years=True)
 # print(df_points)
 list_points = list(zip(df_points['longitude'], df_points['latitude']))[:batch_size]
 project_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/code/fragmentation_bird/development/qgis/fragmentation.qgz"
-year = 2018
+year = 2012
 data_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data"
 path_clc = "/land_cover/corine_land_cover"
 
@@ -38,8 +38,10 @@ path_clc = "/land_cover/corine_land_cover"
 
 # FULL IMPORT
 # This has to be done for years 2006, 2012 and 2018
+# batch_size of 100 may be too big and may need to be reduce to 50.
 # download_clc_year(df_points, batch_size, buffer_radius, year, project_path, 
 #                     data_path, path_clc, starting_point=0, verbose=True)
+
 
 # MERGING
 # This has to be done for years 2006, 2012 and 2018

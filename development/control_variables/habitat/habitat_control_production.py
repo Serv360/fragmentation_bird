@@ -67,21 +67,20 @@ def compute_cover_perc_all(points_df, data_clc_path, clc_to_category_file, year,
     """
     clc_gdf = gpd.read_file(data_clc_path + "/merged/" + f"full_file_{year}.gpkg")
 
-    # invalid = clc_gdf[~clc_gdf.is_valid]
-    # print(f"{len(invalid)} invalid geometries found")
-
-    # return invalid
+    name_column = f'Code_{str(year)[2:4]}'
+    new_name = "code_cover"
 
     # Load CLC code to broad category mapping
     clc_map_df = pd.read_csv(clc_to_category_file, sep=";")
     clc_map_df = clc_map_df.apply(pd.to_numeric)
-    clc_map = dict(zip(clc_map_df['Code_18'], clc_map_df['broad_category']))
+    clc_map = dict(zip(clc_map_df[new_name], clc_map_df['broad_category']))
 
-    # Make sure Code_18 is numeric for clc_gdf 
-    clc_gdf["Code_18"] = pd.to_numeric(clc_gdf["Code_18"], errors='coerce')
+    # Add a column with the right name and make sure it is numeric for clc_gdf 
+    clc_gdf[new_name] = clc_gdf[name_column]
+    clc_gdf[new_name] = pd.to_numeric(clc_gdf[new_name], errors='coerce')
 
     # Map CLC codes to broad categories
-    clc_gdf['broad_category'] = clc_gdf['Code_18'].map(clc_map)
+    clc_gdf['broad_category'] = clc_gdf[new_name].map(clc_map)
 
     # Drop unknown categories
     clc_gdf = clc_gdf.dropna(subset=['broad_category'])
@@ -119,8 +118,8 @@ data_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/da
 path_clc = "/land_cover/corine_land_cover"
 habitat_path = "/control_variables/habitat"
 clc_to_category_file = data_path + "/land_cover/corres_clc_cat.csv"
-buffer_size = 5000
-year=2018
+buffer_size = 4000
+year=2006
 
 
 points_df = get_bird_points(bird_path, 2008, all_years=True)

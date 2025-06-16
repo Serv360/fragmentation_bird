@@ -182,7 +182,7 @@ def download_clc_batch(batch_df, start, buffer_radius, year, project_path, data_
     diff_timer = end_timer - start_timer
     if (verbose):print(f"Done. Execution time = {diff_timer}")
     if (verbose):print("Writing CLC data.")
-    write_clc_file(gdf, data_path + path_clc + "/" + str(year) + f"/batch_clc_{year}_{start}.gpkg")
+    write_clc_file(gdf, data_path + path_clc + "/" + str(year) + f"/batch_clc_{year}_{start}_{len(batch_df)}.gpkg")
 
 def download_clc_year(df_points, batch_size, buffer_radius, year, project_path, 
                     data_path, path_clc, starting_point=0, verbose=True):
