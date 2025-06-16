@@ -5,6 +5,7 @@ from shapely.ops import transform
 from pyproj import Transformer
 import os
 from math import ceil
+from shapely.validation import make_valid
 
 #=====# Functions #=====#
 
@@ -21,6 +22,22 @@ def compute_cover_perc_point(clc_gdf, point, data_clc_path, clc_to_category_file
 
     # Intersect with land cover polygons
     intersected = clc_gdf[clc_gdf.geometry.intersects(buffer_geom)].copy()
+
+    # Necessary because I had a few valid geometries that led to invalid ones in intersected.
+    # Doesn't increase computation time much
+    for idx, geom in intersected.geometry.items():
+        try:
+            _ = geom.intersection(buffer_geom)
+        except Exception as e:
+            print(f"Problem at index {idx}, error: {e}")
+            # Fix geometry using make_valid and retry
+            valid_geom = geom.buffer(0) #make_valid(geom)
+            try:
+                _ = valid_geom.intersection(buffer_geom)
+                intersected.at[idx, 'geometry'] = valid_geom
+            except Exception as e2:
+                print(f"Still problematic after make_valid at index {idx}, error: {e2}")
+
     intersected['geometry'] = intersected.geometry.intersection(buffer_geom)
     intersected['area'] = intersected.geometry.area
 
@@ -49,6 +66,11 @@ def compute_cover_perc_all(points_df, data_clc_path, clc_to_category_file, year,
         Surf_tot is used to control the quality of the download and merging of clc data.
     """
     clc_gdf = gpd.read_file(data_clc_path + "/merged/" + f"full_file_{year}.gpkg")
+
+    # invalid = clc_gdf[~clc_gdf.is_valid]
+    # print(f"{len(invalid)} invalid geometries found")
+
+    # return invalid
 
     # Load CLC code to broad category mapping
     clc_map_df = pd.read_csv(clc_to_category_file, sep=";")
