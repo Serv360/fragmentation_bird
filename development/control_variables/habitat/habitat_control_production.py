@@ -6,6 +6,7 @@ from pyproj import Transformer
 import os
 from math import ceil
 from shapely.validation import make_valid
+import numpy as np
 
 #=====# Functions #=====#
 
@@ -99,6 +100,7 @@ def compute_cover_perc_all(points_df, data_clc_path, clc_to_category_file, year,
         results.append(result_row)
 
     results_df = pd.DataFrame.from_dict(results)
+    results_df['site'] = np.round(results_df['site']).astype(int).astype(str)
 
     if output_folder:
         results_df.to_csv(output_folder + f"/habitat_control_{year}_{buffer_size}.csv", index=False)
@@ -118,18 +120,20 @@ data_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/da
 path_clc = "/land_cover/corine_land_cover"
 habitat_path = "/control_variables/habitat"
 clc_to_category_file = data_path + "/land_cover/corres_clc_cat.csv"
-buffer_size = 4000
-year=2006
+buffer_size = 3000
+year=2018
 
 
 points_df = get_bird_points(bird_path, 2008, all_years=True)
 
-output = compute_cover_perc_all(points_df, 
-                       data_path + path_clc, 
-                       clc_to_category_file, 
-                       year, 
-                       buffer_size, 
-                       output_folder=data_path + habitat_path, 
-                       verbose=True)
+for year in [2006, 2012, 2018]:
+    for buffer_size in [3000, 4000, 5000]:
+        output = compute_cover_perc_all(points_df, 
+                            data_path + path_clc, 
+                            clc_to_category_file, 
+                            year, 
+                            buffer_size, 
+                            output_folder=data_path + habitat_path, 
+                            verbose=True)
 
 print(output)
