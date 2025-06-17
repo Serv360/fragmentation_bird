@@ -3,7 +3,7 @@ from download_clc import write_clc_file, create_layer
 from download_clc import download_clc_year
 from download_clc import merge_gpkg_files
 
-from get_points import get_bird_points
+from get_points import get_bird_points, write_df, add_altitude, get_sites_to_keep
 import time
 
 # Define the point of interest (longitude, latitude)
@@ -45,7 +45,18 @@ path_clc = "/land_cover/corine_land_cover"
 
 # MERGING
 # This has to be done for years 2006, 2012 and 2018
-input_folder = data_path + path_clc + "/" + str(year)
-output_file = data_path + path_clc + "/" + "merged" + f"/full_file_{year}.gpkg"
+# input_folder = data_path + path_clc + "/" + str(year)
+# output_file = data_path + path_clc + "/" + "merged" + f"/full_file_{year}.gpkg"
+# merge_gpkg_files(input_folder, output_file, input_layer=None)
 
-merge_gpkg_files(input_folder, output_file, input_layer=None)
+# COMPUTE ALTITUDE DATA
+# output_path_alt = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/countingdata_2007_2023_alt.csv"
+# bird_data = get_bird_points(bird_path, 2008, all_years=True)
+# bird_data = add_altitude(bird_data)
+# write_df(bird_data, output_path_alt)
+
+# GET FINAL POINT DATA
+output_path_sites_to_keep = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_to_keep.csv"
+alt_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/countingdata_2007_2023_alt.csv"
+df = get_sites_to_keep(bird_path, alt_path)
+write_df(df, output_path_sites_to_keep)
