@@ -3,7 +3,7 @@ from download_clc import write_clc_file, create_layer
 from download_clc import download_clc_year
 from download_clc import merge_gpkg_files
 
-from get_points import get_bird_points, write_df, add_altitude, get_sites_to_keep
+from get_points import get_bird_points, write_df, add_altitude, get_sites_to_keep, create_sites_to_keep
 import time
 
 # Define the point of interest (longitude, latitude)
@@ -55,8 +55,14 @@ path_clc = "/land_cover/corine_land_cover"
 # bird_data = add_altitude(bird_data)
 # write_df(bird_data, output_path_alt)
 
-# GET FINAL POINT DATA
-output_path_sites_to_keep = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_to_keep.csv"
-alt_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/countingdata_2007_2023_alt.csv"
-df = get_sites_to_keep(bird_path, alt_path)
-write_df(df, output_path_sites_to_keep)
+# GET SITES TO KEEP
+# output_path_sites_to_keep = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_to_keep.csv"
+# alt_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/countingdata_2007_2023_alt.csv"
+# df = create_sites_to_keep(bird_path, alt_path)
+# write_df(df, output_path_sites_to_keep)
+
+sites_to_keep_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_to_keep.csv"
+points_to_keep = get_sites_to_keep(sites_to_keep_path)
+print(len(points_to_keep))
+# merged_buffer = multiple_points_shape(points_to_keep, 3000)
+# create_layer(merged_buffer, esri_format=False)

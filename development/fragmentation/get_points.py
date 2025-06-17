@@ -41,7 +41,7 @@ def get_bird_points(file_path, year, all_years=False):
     df = df[['site', 'longitude', 'latitude']].drop_duplicates()
     return df
 
-def get_sites_to_keep(bird_path, altitude_path):
+def create_sites_to_keep(bird_path, altitude_path):
     bird_data = pd.read_csv(bird_path)
     bird_data['annee'] = bird_data['annee'].astype(int)
     alt_data = pd.read_csv(altitude_path)
@@ -63,5 +63,9 @@ def get_sites_to_keep(bird_path, altitude_path):
 
     return filtered_df
 
-
+def get_sites_to_keep(sites_to_keep_path):
+    sites_to_keep = pd.read_csv(sites_to_keep_path)
+    sites_to_keep = sites_to_keep[["site", "longitude", "latitude"]].drop_duplicates()
+    points_to_keep = list(zip(sites_to_keep['longitude'], sites_to_keep['latitude']))
+    return points_to_keep
 
