@@ -41,7 +41,7 @@ def get_bird_points(file_path, year, all_years=False):
     df = df[['site', 'longitude', 'latitude']].drop_duplicates()
     return df
 
-def create_sites_to_keep(bird_path, altitude_path):
+def create_sites_to_keep(bird_path, altitude_path, version="all_three"):
     bird_data = pd.read_csv(bird_path)
     bird_data['annee'] = bird_data['annee'].astype(int)
     alt_data = pd.read_csv(altitude_path)
@@ -50,22 +50,43 @@ def create_sites_to_keep(bird_path, altitude_path):
     df = df[df["passage"]=="OK_1_and_2"] # Ensure that two surveys were conducted
     df = df[df["annee"].isin([2008, 2012, 2018])]
 
-    required_years = {2008, 2012, 2018}
-    # Group by 'site' and collect all years observed per site
-    sites_with_required_years = (
-        df.groupby('site')['annee']
-        .apply(set)
-        .loc[lambda x: x.apply(lambda years: required_years.issubset(years))]
-        .index
-    )
-    # Step 2: Filter the dataframe to keep only those sites
-    filtered_df = df[df['site'].isin(sites_with_required_years)]
+    if version == "all_three":
+        required_years = {2008, 2012, 2018}
+        # Group by 'site' and collect all years observed per site
+        sites_with_required_years = (
+            df.groupby('site')['annee']
+            .apply(set)
+            .loc[lambda x: x.apply(lambda years: required_years.issubset(years))]
+            .index
+        )
+        # Step 2: Filter the dataframe to keep only those sites
+        filtered_df = df[df['site'].isin(sites_with_required_years)]
+
+    else:
+        if version == "two_out_of_three":
+            required_years = {2008, 2012, 2018}
+            # Group by 'site' and collect all years observed per site
+            sites_with_required_years = (
+                df.groupby('site')['annee']
+                .apply(set)
+                .loc[lambda x: x.apply(lambda years: len(years.intersection(required_years)) >= 2)]
+                .index
+            )
+            # Step 2: Filter the dataframe to keep only those sites
+            filtered_df = df[df['site'].isin(sites_with_required_years)]
+        else:
+            print(f"Version is incorrect: {version} given. Should be in ['all_three', 'two_out_of_three']")
 
     return filtered_df
 
-def get_sites_to_keep(sites_to_keep_path):
+def get_points_to_keep(sites_to_keep_path, group=None):
     sites_to_keep = pd.read_csv(sites_to_keep_path)
+    if group is not None:sites_to_keep = sites_to_keep[sites_to_keep["group"]==group]
     sites_to_keep = sites_to_keep[["site", "longitude", "latitude"]].drop_duplicates()
     points_to_keep = list(zip(sites_to_keep['longitude'], sites_to_keep['latitude']))
     return points_to_keep
 
+def get_sites_to_keep(sites_to_keep_path):
+    sites_to_keep = pd.read_csv(sites_to_keep_path)
+    sites_to_keep = sites_to_keep[["site", "annee", "longitude", "latitude"]].drop_duplicates()
+    return sites_to_keep

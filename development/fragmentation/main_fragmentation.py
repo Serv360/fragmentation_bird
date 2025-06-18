@@ -3,8 +3,10 @@ from download_clc import write_clc_file, create_layer
 from download_clc import download_clc_year
 from download_clc import merge_gpkg_files
 
-from get_points import get_bird_points, write_df, add_altitude, get_sites_to_keep, create_sites_to_keep
+from get_points import get_bird_points, write_df, add_altitude, get_points_to_keep, create_sites_to_keep, get_sites_to_keep
 import time
+from frag_partition import partition
+from utils_fragscape import multiple_points_features
 
 # Define the point of interest (longitude, latitude)
 lon, lat = 2.9256, 47.4125  # Example coordinates in ESPG:4326 !
@@ -55,14 +57,35 @@ path_clc = "/land_cover/corine_land_cover"
 # bird_data = add_altitude(bird_data)
 # write_df(bird_data, output_path_alt)
 
-# GET SITES TO KEEP
-# output_path_sites_to_keep = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_to_keep.csv"
+# COMPUTE SITES TO KEEP ALL THREE
+# output_path_sites_to_keep_all_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_to_keep_all_three.csv"
 # alt_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/countingdata_2007_2023_alt.csv"
-# df = create_sites_to_keep(bird_path, alt_path)
-# write_df(df, output_path_sites_to_keep)
+# df = create_sites_to_keep(bird_path, alt_path, version="all_three")
+# write_df(df, output_path_sites_to_keep_all_three)
 
-sites_to_keep_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_to_keep.csv"
-points_to_keep = get_sites_to_keep(sites_to_keep_path)
-print(len(points_to_keep))
+# COMPUTE SITES TO KEEP TWO OUT OF THREE
+# output_path_sites_to_keep_two_out_of_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_to_keep_two_out_of_three.csv"
+# alt_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/countingdata_2007_2023_alt.csv"
+# df = create_sites_to_keep(bird_path, alt_path, version="two_out_of_three")
+# write_df(df, output_path_sites_to_keep_two_out_of_three)
+
+# OBSERVE SITES TO KEEP
+# sites_to_keep_all_three_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_to_keep_all_three.csv"
+sites_to_keep_two_out_of_three_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_to_keep_two_out_of_three.csv"
+# points_to_keep = get_points_to_keep(sites_to_keep_two_out_of_three_path)
+# print(len(points_to_keep))
 # merged_buffer = multiple_points_shape(points_to_keep, 3000)
 # create_layer(merged_buffer, esri_format=False)
+
+# ASSIGN GROUPS
+# output_path_sites_with_group_two_out_of_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_with_group_two_out_of_three.csv"
+# sites_to_keep = get_sites_to_keep(sites_to_keep_two_out_of_three_path)
+# print(len(sites_to_keep))
+# sites_with_group = partition(sites_to_keep, 3000)
+# write_df(sites_with_group, output_path_sites_with_group_two_out_of_three)
+
+# CREATE LAYER WITH FEATURES
+features_output_all_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/features_all_three.gpkg"
+sites_with_group_all_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_with_group_all_three.csv"
+points = get_points_to_keep(sites_with_group_all_three, group=0)
+multiple_points_features(points, 3000, features_output_all_three)

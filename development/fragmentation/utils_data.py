@@ -1,4 +1,6 @@
 import os
+import geopandas as gpd
+import time
 
 #=====# Functions #=====#
 
@@ -19,8 +21,21 @@ def create_dep_folder(base_folder):
 
     print("Folders created successfully.")
 
+def clip_roads_rails(base_folder):
+    path_shp = base_folder + "/2018/01/A_RESEAU_ROUTIER/CHEMIN.SHP"
+    print(time.time())
+    shapefile_gdf = gpd.read_file(path_shp)
+    
+
+
 #=====# Global variables #=====#
 
-base_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/roads_rails/2018"
+base_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/roads_rails"
+road_elements = ["CHEMIN.SHP", "ROUTE_NOMMEE.SHP", "ROUTE_PRIMAIRE.SHP", "ROUTE_SECONDAIRE.SHP"]
+rail_elements = ["TRONCON_VOIE_FERREE.SHP"]
 
-create_dep_folder(base_folder)
+# CREATE FOLDERS
+#create_dep_folder(base_folder + "/2018")
+
+# CLIP ROAD AND RAIL DATA
+clip_roads_rails(base_folder)
