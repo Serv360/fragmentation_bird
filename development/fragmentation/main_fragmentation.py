@@ -7,6 +7,7 @@ from get_points import get_bird_points, write_df, add_altitude, get_points_to_ke
 import time
 from frag_partition import partition
 from utils_fragscape import multiple_points_features
+from utils_data import clip_roads_rails
 
 # Define the point of interest (longitude, latitude)
 lon, lat = 2.9256, 47.4125  # Example coordinates in ESPG:4326 !
@@ -20,9 +21,8 @@ points = [(2.556, 47.4125)]
 bird_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/countingdata_2007_2023.csv"
 
 batch_size = 100
-df_points = get_bird_points(bird_path, 2008, all_years=True)
-# print(df_points)
-list_points = list(zip(df_points['longitude'], df_points['latitude']))[:batch_size]
+# df_points = get_bird_points(bird_path, 2008, all_years=True)
+# list_points = list(zip(df_points['longitude'], df_points['latitude']))[:batch_size]
 project_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/code/fragmentation_bird/development/qgis/fragmentation.qgz"
 year = 2012
 data_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data"
@@ -85,7 +85,15 @@ sites_to_keep_two_out_of_three_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3
 # write_df(sites_with_group, output_path_sites_with_group_two_out_of_three)
 
 # CREATE LAYER WITH FEATURES
-features_output_all_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/features_all_three.gpkg"
-sites_with_group_all_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_with_group_all_three.csv"
-points = get_points_to_keep(sites_with_group_all_three, group=0)
-multiple_points_features(points, 3000, features_output_all_three)
+# features_output_all_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/features_all_three.gpkg"
+# sites_with_group_all_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_with_group_all_three.csv"
+# points = get_points_to_keep(sites_with_group_all_three, group=0)
+# multiple_points_features(points, 3000, features_output_all_three)
+
+# 
+base_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/roads_rails"
+road_elements = ["CHEMIN.SHP", "ROUTE_NOMMEE.SHP", "ROUTE_PRIMAIRE.SHP", "ROUTE_SECONDAIRE.SHP"]
+rail_elements = ["TRONCON_VOIE_FERREE.SHP"]
+df_points = get_bird_points(bird_path, 2008, all_years=True)
+list_points = list(zip(df_points['longitude'], df_points['latitude']))
+clip_roads_rails(base_folder, multiple_points_shape(list_points, 5000))

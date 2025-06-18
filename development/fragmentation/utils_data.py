@@ -21,11 +21,26 @@ def create_dep_folder(base_folder):
 
     print("Folders created successfully.")
 
-def clip_roads_rails(base_folder):
+def clip_roads_rails(base_folder, merged_buffer):
     path_shp = base_folder + "/2018/01/A_RESEAU_ROUTIER/CHEMIN.SHP"
-    print(time.time())
-    shapefile_gdf = gpd.read_file(path_shp)
+    path_gpkg = base_folder + "/2018/01/A_RESEAU_ROUTIER/CHEMIN.gpkg"
+    a = time.time()
+    target_crs = "EPSG:3035"
+    shapefile_gdf = gpd.read_file(path_shp).to_crs(target_crs)
     
+    # Create GeoDataFrame from the merged buffer and assign the same CRS
+    buffer_gdf = gpd.GeoDataFrame(geometry=[merged_buffer], crs=target_crs)
+
+    # Intersect
+    result = gpd.overlay(shapefile_gdf, buffer_gdf, how="intersection")
+    b = time.time()
+    print(b - a)
+    # Save to GeoPackage
+    result.to_file(path_gpkg, layer="chemin", driver="GPKG")
+    
+
+
+
 
 
 #=====# Global variables #=====#
@@ -38,4 +53,3 @@ rail_elements = ["TRONCON_VOIE_FERREE.SHP"]
 #create_dep_folder(base_folder + "/2018")
 
 # CLIP ROAD AND RAIL DATA
-clip_roads_rails(base_folder)
