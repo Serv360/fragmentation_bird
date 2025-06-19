@@ -87,13 +87,13 @@ def merge_roads_rails(base_folder, year, output_path, file_path, layer_name="fra
 #=====# Global variables #=====#
 
 base_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/roads_rails"
-road_elements = ["CHEMIN.SHP", "ROUTE_NOMMEE.SHP", "ROUTE_PRIMAIRE.SHP", "ROUTE_SECONDAIRE.SHP"]
-rail_elements = ["TRONCON_VOIE_FERREE.SHP"]
+road_elements = ["CHEMIN.SHP", "ROUTE_NOMMEE.SHP", "ROUTE_PRIMAIRE.SHP", "ROUTE_SECONDAIRE.SHP"] #A_RESEAU_ROUTIER
+rail_elements = ["TRONCON_VOIE_FERREE.SHP"] #B_VOIES_FERREES_ET_AUTRES
 output_merged = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/roads_rails/merged"
 
 # CREATE FOLDERS
 #create_dep_folder(base_folder + "/2018")
 
 # MERGE ROAD AND RAIL DATA
-file_path = "A_RESEAU_ROUTIER/CHEMIN.SHP"
-merge_roads_rails(base_folder, 2008, output_merged + "/chemin_2008_70.gpkg", file_path, layer_name="france_roads_rails")
+file_path = "A_RESEAU_ROUTIER/ROUTE_NOMMEE.SHP"
+merge_roads_rails(base_folder, 2008, output_merged + "/route_nommee_2008_full.gpkg", file_path, layer_name="france_roads_rails")
