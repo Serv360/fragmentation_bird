@@ -12,7 +12,7 @@ import time
 from shapely.strtree import STRtree
 from shapely.geometry import GeometryCollection
 
-def multiple_points_shape(points, buffer_radius):
+def multiple_points_shape(points, buffer_radius, output=None):
     # Define coordinate transformations
     transformer_to_3035 = Transformer.from_crs("EPSG:4326", "EPSG:3035", always_xy=True)
     # transformer_to_4326 = Transformer.from_crs("EPSG:3035", "EPSG:4326", always_xy=True)
@@ -27,7 +27,10 @@ def multiple_points_shape(points, buffer_radius):
     # Merge all buffer zones into one geometry (MultiPolygon or Polygon)
     merged_buffer = unary_union(buffers)
     #print(merged_buffer)
-    # === 4. Convert geometry to ESRI JSON ===
+    
+    if output is not None:
+        gdf = gpd.GeoDataFrame(geometry=[merged_buffer], crs="EPSG:3035")
+        gdf.to_file(output, layer="multipolygon_layer", driver="GPKG")
     
     return merged_buffer
 

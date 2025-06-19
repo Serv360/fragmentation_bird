@@ -85,15 +85,17 @@ sites_to_keep_two_out_of_three_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3
 # write_df(sites_with_group, output_path_sites_with_group_two_out_of_three)
 
 # CREATE LAYER WITH FEATURES
-# features_output_all_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/features_all_three.gpkg"
-# sites_with_group_all_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_with_group_all_three.csv"
-# points = get_points_to_keep(sites_with_group_all_three, group=0)
+features_output_all_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/features_all_three.gpkg"
+sites_with_group_all_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_with_group_all_three.csv"
+base_output_all_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/base_all_three.gpkg"
+points = get_points_to_keep(sites_with_group_all_three, group=0)
 # multiple_points_features(points, 3000, features_output_all_three)
+multiple_points_shape(points, 5000, output=base_output_all_three)
 
-# 
-base_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/roads_rails"
-road_elements = ["CHEMIN.SHP", "ROUTE_NOMMEE.SHP", "ROUTE_PRIMAIRE.SHP", "ROUTE_SECONDAIRE.SHP"]
-rail_elements = ["TRONCON_VOIE_FERREE.SHP"]
-df_points = get_bird_points(bird_path, 2008, all_years=True)
-list_points = list(zip(df_points['longitude'], df_points['latitude']))
-clip_roads_rails(base_folder, multiple_points_shape(list_points, 5000))
+# CLIPPING TEST
+# base_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/roads_rails"
+# road_elements = ["CHEMIN.SHP", "ROUTE_NOMMEE.SHP", "ROUTE_PRIMAIRE.SHP", "ROUTE_SECONDAIRE.SHP"]
+# rail_elements = ["TRONCON_VOIE_FERREE.SHP"]
+# df_points = get_bird_points(bird_path, 2008, all_years=True)
+# list_points = list(zip(df_points['longitude'], df_points['latitude']))
+# clip_roads_rails(base_folder, multiple_points_shape(list_points, 5000))
