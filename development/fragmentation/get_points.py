@@ -83,8 +83,9 @@ def get_points_to_keep(sites_to_keep_path, group=None):
     sites_to_keep = pd.read_csv(sites_to_keep_path)
     if group is not None:sites_to_keep = sites_to_keep[sites_to_keep["group"]==group]
     sites_to_keep = sites_to_keep[["site", "longitude", "latitude"]].drop_duplicates()
+    sites = sites_to_keep["site"].copy()
     points_to_keep = list(zip(sites_to_keep['longitude'], sites_to_keep['latitude']))
-    return points_to_keep
+    return points_to_keep, sites
 
 def get_sites_to_keep(sites_to_keep_path):
     sites_to_keep = pd.read_csv(sites_to_keep_path)
