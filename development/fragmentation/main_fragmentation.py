@@ -92,50 +92,41 @@ sites_to_keep_two_out_of_three_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3
 # write_df(sites_with_group, output_path_sites_with_group_all_three)
 
 # CREATE LAYER WITH FEATURES ALL THREE
-# features_output_all_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/computation/features_all_three_group2_5000.gpkg"
+# features_output_all_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/computation/features_all_three_group0.gpkg"
 # sites_with_group_all_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_with_group_all_three_5000.csv"
-# base_output_all_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/computation/base_all_three.gpkg"
+# base_output_all_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/computation/base_all_three_group2.gpkg"
 # points, sites = get_points_to_keep(sites_with_group_all_three, group=2)
-# multiple_points_features(points, 3000, sites, features_output_all_three)
-# # multiple_points_shape(points, 5000, output=base_output_all_three)
+# # multiple_points_features(points, 3000, sites, features_output_all_three)
+# multiple_points_shape(points, 5000, output=base_output_all_three)
 
 # CREATE LAYER WITH FEATURES TWO OUT OF THREE
-# features_output_two_out_of_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/computation/features_two_out_of_three_group4_5000.gpkg"
-# sites_with_group_two_out_of_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_with_group_two_out_of_three_5000.csv"
-# base_output_two_out_of_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/computation/base_two_out_of_three.gpkg"
+# features_output_two_out_of_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/computation/features_two_out_of_three_group4.gpkg"
+# sites_with_group_two_out_of_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_with_group_two_out_of_three_5000.csv" # 5000 here is because I constructed groups with a 5000 buffer separation
+# base_output_two_out_of_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/computation/base_two_out_of_three_group4.gpkg"
 # points, sites = get_points_to_keep(sites_with_group_two_out_of_three, group=4)
-# multiple_points_features(points, 3000, sites, features_output_two_out_of_three)
-# # multiple_points_shape(points, 5000, output=base_output_two_out_of_three)
-
-# CLIPPING TEST
-# base_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/roads_rails"
-# road_elements = ["CHEMIN.SHP", "ROUTE_NOMMEE.SHP", "ROUTE_PRIMAIRE.SHP", "ROUTE_SECONDAIRE.SHP"]
-# rail_elements = ["TRONCON_VOIE_FERREE.SHP"]
-# df_points = get_bird_points(bird_path, 2008, all_years=True)
-# list_points = list(zip(df_points['longitude'], df_points['latitude']))
-# clip_roads_rails(base_folder, multiple_points_shape(list_points, 5000))
-
+# # multiple_points_features(points, 3000, sites, features_output_two_out_of_three)
+# multiple_points_shape(points, 5000, output=base_output_two_out_of_three)
 
 # RECOVER FRAGMENTATION DATA
-frag_working_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/computation"
-year = 2008
-version = "all_three" # two_out_of_three
-group = 0
-file_features = f"features_{version}_group{group}_5000.gpkg" # 5000 here is because I constructed groups with a 5000 buffer separation
-output_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/results"
-file_output = f"results_{version}_group{group}_{year}.csv"
-input_path = f"C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/code/qgis/fragscape_test_full2_without_chemin/outputs/reportingResultsCBC.gpkg"
-features_path = frag_working_folder + "/" + file_features
-output_path = output_folder + "/" + file_output
-results_to_csv(input_path, output_path, features_path, year, group=None) # fragscape_{version}_group{group}_{year}
+# frag_working_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/computation"
+# year = 2008
+# version = "all_three" # two_out_of_three
+# group = 0
+# file_features = f"features_{version}_group{group}.gpkg" 
+# output_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/results"
+# file_output = f"results_{version}_group{group}_{year}.csv"
+# input_path = f"C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/code/qgis/fragscape_{version}_group{group}_{year}/outputs/reportingResultsCBC.gpkg"
+# features_path = frag_working_folder + "/" + file_features
+# output_path = output_folder + "/" + file_output
+# results_to_csv(input_path, output_path, features_path, year, group=None) # 
 
 # MERGE FRAGMENTATION DATA
-input_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/results"
-groups = []
-version = "all_three"
-year = 2008
-output_folder = input_folder
-file_output = f"results_{version}_{year}.csv"
-output_path = output_folder + "/" + file_output
+# input_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/results"
+# groups = []
+# version = "all_three"
+# year = 2008
+# output_folder = input_folder
+# file_output = f"results_{version}_{year}.csv"
+# output_path = output_folder + "/" + file_output
 
-merge_results(input_folder, groups, version, year, output_path)
+# merge_results(input_folder, groups, version, year, output_path)

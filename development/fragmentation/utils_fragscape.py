@@ -17,7 +17,7 @@ def multiple_points_features(points, buffer_radius, sites, features_output):
         
     gdf = gpd.GeoDataFrame(geometry=buffers, crs="EPSG:3035")
     gdf["site"] = sites.to_list()
-    print(gdf)
+    #print(gdf)
     gdf.to_file(features_output, layer="buffer_features", driver="GPKG")
     
     return gdf
