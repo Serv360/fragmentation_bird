@@ -109,9 +109,9 @@ sites_to_keep_two_out_of_three_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3
 
 # RECOVER FRAGMENTATION DATA
 # frag_working_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/computation"
-# year = 2008
+# year = 2018
 # version = "all_three" # two_out_of_three
-# group = 0
+# group = 2
 # file_features = f"features_{version}_group{group}.gpkg" 
 # output_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/results"
 # file_output = f"results_{version}_group{group}_{year}.csv"
@@ -121,12 +121,12 @@ sites_to_keep_two_out_of_three_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3
 # results_to_csv(input_path, output_path, features_path, year, group=None) # 
 
 # MERGE FRAGMENTATION DATA
-# input_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/results"
-# groups = []
-# version = "all_three"
-# year = 2008
-# output_folder = input_folder
-# file_output = f"results_{version}_{year}.csv"
-# output_path = output_folder + "/" + file_output
+input_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/results"
+groups = [0, 1, 2]
+version = "all_three"
+year = 2018
+output_folder = input_folder
+file_output = f"results_{version}_{year}.csv"
+output_path = output_folder + "/" + file_output
 
-# merge_results(input_folder, groups, version, year, output_path)
+merge_results(input_folder, groups, version, year, output_path)
