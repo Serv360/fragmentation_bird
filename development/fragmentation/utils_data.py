@@ -95,5 +95,5 @@ output_merged = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation E
 #create_dep_folder(base_folder + "/2018")
 
 # MERGE ROAD AND RAIL DATA
-file_path = "A_RESEAU_ROUTIER/ROUTE_NOMMEE.SHP"
-merge_roads_rails(base_folder, 2008, output_merged + "/route_nommee_2008_full.gpkg", file_path, layer_name="france_roads_rails")
+file_path = "A_RESEAU_ROUTIER/ROUTE_SECONDAIRE.SHP"
+merge_roads_rails(base_folder, 2018, output_merged + "/route_secondaire_2018_full.gpkg", file_path, layer_name="france_roads_rails")
