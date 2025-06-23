@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 #=====# Functions #=====#
 
@@ -63,15 +64,34 @@ def load_data(bird_indic_path, habitat_folder, climate_path,
     climate_data = pd.read_csv(climate_path)
 
     # Load agric intensity
-    if climate_path is None:
+    if agric_path is None:
         agric_data = None
     else:
-        agric_data = pd.read_csv(climate_path)
+        agric_data = pd.read_csv(agric_path)
 
     return indicator_data, habitat_data, climate_data, fragmentation_data, agric_data
 
-def build_difference_dataset():
-    pass
+def build_difference_dataset(final_data_folder, output_folder, version):
+    final_data = pd.read_csv(final_data_folder + f"/final_data_{version}.csv")
+
+    # Step 1: Do a self-merge on site
+    merged = final_data.merge(final_data, on='site', suffixes=('_j', '_i'))
+
+    # Step 2: Filter only where year_j > year_i
+    merged = merged[merged['year_j'] > merged['year_i']]
+
+    # Step 3: Compute differences
+    for col in final_data.columns:
+        if col not in ["site", "year"]:
+            merged[f'diff_{col}'] = merged[f'{col}_j'] - merged[f'{col}_i']
+
+    difference_data = merged[['site', 'year_j', 'year_i'] + [f"diff_{col}" for col in final_data.columns if col not in ["site", "year"]]].copy()
+
+    difference_data["year_diff"] = difference_data["year_j"].astype(str) + "-" + difference_data["year_i"].astype(str)
+
+    difference_data.to_csv(output_folder + "/" + f"difference_data_{version}.csv")
+
+    print(difference_data)
 
 #=====# Global variables #=====#
 
@@ -94,3 +114,7 @@ def build_difference_dataset():
 
 
 # CONSTRUCT THE DIFFERENCE DATASET
+version = "all_three"
+final_data_folder = f"C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/merged_data"
+output_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/merged_data"
+build_difference_dataset(final_data_folder, output_folder, version)
