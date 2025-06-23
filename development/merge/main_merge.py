@@ -89,9 +89,7 @@ def build_difference_dataset(final_data_folder, output_folder, version):
 
     difference_data["year_diff"] = difference_data["year_j"].astype(str) + "-" + difference_data["year_i"].astype(str)
 
-    difference_data.to_csv(output_folder + "/" + f"difference_data_{version}.csv")
-
-    print(difference_data)
+    difference_data.to_csv(output_folder + "/" + f"difference_data_{version}.csv", index=False)
 
 #=====# Global variables #=====#
 
