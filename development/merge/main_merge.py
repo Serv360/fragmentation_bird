@@ -85,7 +85,7 @@ def build_difference_dataset(final_data_folder, output_folder, version):
         if col not in ["site", "year"]:
             merged[f'diff_{col}'] = merged[f'{col}_j'] - merged[f'{col}_i']
 
-    difference_data = merged[['site', 'year_j', 'year_i'] + [f"diff_{col}" for col in final_data.columns if col not in ["site", "year"]]].copy()
+    difference_data = merged[['site', 'group', 'year_j', 'year_i'] + [f"diff_{col}" for col in final_data.columns if col not in ["site", "year"]]].copy()
 
     difference_data["year_diff"] = difference_data["year_j"].astype(str) + "-" + difference_data["year_i"].astype(str)
 
