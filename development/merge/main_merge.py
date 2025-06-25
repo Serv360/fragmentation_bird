@@ -3,7 +3,7 @@ import numpy as np
 
 #=====# Functions #=====#
 
-def merge(bird_indicators, habitat_data, climate_data, fragmentation_data, agric_data, output_folder, version):
+def merge(bird_indicators, bird_geo_data, habitat_data, climate_data, fragmentation_data, agric_data, output_folder, version):
     """
     Join on (site, year).
     year in [2008, 2012, 2018]
@@ -19,6 +19,7 @@ def merge(bird_indicators, habitat_data, climate_data, fragmentation_data, agric
     final_data = pd.merge(fragmentation_data, bird_indicators, on=['site', 'year'], how='left')
     final_data = pd.merge(final_data, habitat_data, on=['site', 'year'], how='left')
     final_data = pd.merge(final_data, climate_data, on=['site', 'year'], how='left')
+    final_data = pd.merge(final_data, bird_geo_data, on=['site', 'year'], how='left')
     if agric_data is None:
         print("No agriculture data.")
     else:
@@ -26,12 +27,17 @@ def merge(bird_indicators, habitat_data, climate_data, fragmentation_data, agric
     
     final_data.to_csv(output_folder + "/" + f"final_data_{version}.csv", index=False)
 
-def load_data(bird_indic_path, habitat_folder, climate_path, 
+def load_data(bird_indic_path, bird_data_folder, habitat_folder, climate_path, 
               fragmentation_folder, agric_path, 
-              years_clc, years_STOC, year_clc_to_STOC, buffer_size=3000):
+              years_clc, years_STOC, year_clc_to_STOC, version, buffer_size=3000):
     
     # Load bird indicators
     indicator_data_int = pd.read_csv(bird_indic_path)
+    # Load bird go data
+    bird_geo_data = pd.read_csv(bird_data_folder + "/" + f"sites_to_keep_{version}.csv")
+    bird_geo_data = bird_geo_data[["site", "annee", "longitude", "latitude", "alt"]].drop_duplicates()
+    bird_geo_data.rename(columns={'annee': 'year'}, inplace=True)
+
     # Assuming df is your DataFrame
     indicator_data = indicator_data_int.pivot_table(
     index=['site', 'annee'],
@@ -69,23 +75,30 @@ def load_data(bird_indic_path, habitat_folder, climate_path,
     else:
         agric_data = pd.read_csv(agric_path)
 
-    return indicator_data, habitat_data, climate_data, fragmentation_data, agric_data
+    return indicator_data, bird_geo_data, habitat_data, climate_data, fragmentation_data, agric_data
 
 def build_difference_dataset(final_data_folder, output_folder, version):
     final_data = pd.read_csv(final_data_folder + f"/final_data_{version}.csv")
 
+    merge_on = ["site", "group", "alt", "longitude", "latitude"]
+
     # Step 1: Do a self-merge on site
-    merged = final_data.merge(final_data, on='site', suffixes=('_j', '_i'))
+    merged = final_data.merge(final_data, on=merge_on, suffixes=('_j', '_i'))
 
     # Step 2: Filter only where year_j > year_i
     merged = merged[merged['year_j'] > merged['year_i']]
 
+    no_diff = merge_on + ["year"]
+
     # Step 3: Compute differences
     for col in final_data.columns:
-        if col not in ["site", "year"]:
+        if col not in no_diff:
             merged[f'diff_{col}'] = merged[f'{col}_j'] - merged[f'{col}_i']
+            merged[f'diff_perc_{col}'] = (merged[f'{col}_j'] - merged[f'{col}_i'])/merged[f'{col}_i']
 
-    difference_data = merged[['site', 'group', 'year_j', 'year_i'] + [f"diff_{col}" for col in final_data.columns if col not in ["site", "year"]]].copy()
+    difference_data = merged[merge_on + ["year_j", "year_i"] +
+                             [f"diff_{col}" for col in final_data.columns if col not in no_diff] +
+                             [f"diff_perc_{col}" for col in final_data.columns if col not in no_diff]].copy()
 
     difference_data["year_diff"] = difference_data["year_j"].astype(str) + "-" + difference_data["year_i"].astype(str)
 
@@ -94,21 +107,22 @@ def build_difference_dataset(final_data_folder, output_folder, version):
 #=====# Global variables #=====#
 
 # MERGE THE DATASETS
-bird_indic_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/div_indicators/indicators.csv"
-habitat_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/control_variables/habitat"
-climate_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/control_variables/climate/climate_controls.csv"
-fragmentation_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/results"
-agric_path = None
-output_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/merged_data"
-years_STOC = [2008, 2012, 2018]
-years_clc = [2006, 2012, 2018]
-year_clc_to_STOC = {2006:2008, 2012:2012, 2018:2018}
-version = "all_three"
+# bird_indic_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/div_indicators/indicators.csv"
+# habitat_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/control_variables/habitat"
+# climate_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/control_variables/climate/climate_controls.csv"
+# fragmentation_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/results"
+# agric_path = None
+# output_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/merged_data"
+# bird_data_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC"
+# years_STOC = [2008, 2012, 2018]
+# years_clc = [2006, 2012, 2018]
+# year_clc_to_STOC = {2006:2008, 2012:2012, 2018:2018}
+# version = "all_three"
 
-indicator_data, habitat_data, climate_data, fragmentation_data, agric_data = load_data(
-    bird_indic_path, habitat_folder, climate_path, fragmentation_folder, agric_path, years_clc, years_STOC, year_clc_to_STOC
-)
-merge(indicator_data, habitat_data, climate_data, fragmentation_data, agric_data, output_folder, version)
+# indicator_data, bird_geo_data, habitat_data, climate_data, fragmentation_data, agric_data = load_data(
+#     bird_indic_path, bird_data_folder, habitat_folder, climate_path, fragmentation_folder, agric_path, years_clc, years_STOC, year_clc_to_STOC, version
+# )
+# merge(indicator_data, bird_geo_data, habitat_data, climate_data, fragmentation_data, agric_data, output_folder, version)
 
 
 # CONSTRUCT THE DIFFERENCE DATASET
