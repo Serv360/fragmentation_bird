@@ -16,6 +16,7 @@ def merge_results(input_folder, groups, version, year, file_output, verbose=True
     if verbose:print("Loading files...")
     for group in groups:
         df = gpd.read_file(input_folder + "/" + f"results_{version}_group{group}_{year}.csv")
+        df["group"] = group
         dfs.append(df)
     if verbose:print(f"{len(dfs)} files loaded. Merging files...")
     combined_df = pd.concat(dfs, ignore_index=True)
