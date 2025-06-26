@@ -152,12 +152,18 @@ final_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/
 final_data <- read_csv(final_path)
 diff_data <- read_csv(diff_path)
 
+
+
+diff_data <- diff_data %>% filter(year_diff=="2018-2008")
+
+diff_data <- diff_data %>% left_join(final_data, by=c("site" = "site", "year_i"="year"))
+
 # Define predictors and response
-predictors <- c("diff_CBC_MSIZ", "diff_temperature_moyenne24h",
+predictors <- c("diff_perc_CBC_MSIZ", "diff_perc3", "perc3", "diff_temperature_moyenne24h",
                 "diff_precipitation_somme24h", "diff_radiation_somme24h")
 
 y <- "diff_Total_Abundance_woodland"
-y_vars <- c("diff_Total_Abundance_woodland", 
+y_vars <- c("diff_Total_Abundance_woodland",
             "diff_Total_Abundance_urban",
             "diff_Total_Abundance_all",
             "diff_Total_Abundance_generalist",
