@@ -2,6 +2,8 @@
 library(tidyverse)
 library(dplyr)
 library(rlang)
+library(lmtest)
+library(sandwich)
 
 create_groups <- function(data, col_to_group, threshold_vector, treatment_group_names) {
   
@@ -38,8 +40,11 @@ run_diffindiffs <- function(data, y, dum_y, dummy_groups, x_controls, col_to_sta
   # Run linear model
   model <- lm(formula, data = data)
   
-  # Output table
-  summary(model)
+  # Clustered standard errors by a column (e.g., cluster_id)
+  cl_vcov <- vcovCL(model, cluster = ~site)
+  
+  # Print model summary with clustered SEs
+  coeftest(model, vcov. = cl_vcov)
 }
 
 
@@ -48,22 +53,29 @@ diff_data <- read_csv(diff_path)
 final_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/merged_data/final_data_all_three.csv"
 final_data <- read_csv(final_path)
 
-final_data <- final_data %>% filter(year != 2012) %>% filter(perc4 < 0.2) %>%
-    mutate(dummy_year = ifelse(year == 2008, 0,
-                               ifelse(year == 2018, 1, NA)))
+final_data <- final_data %>% filter(perc4 < 0.2) %>%
+    mutate(dummy_year = ifelse(year == 2008, 0, 1))
 
-diff_data <- diff_data %>% filter(year_diff == "2018-2008") %>% filter(abs(diff_CBC_MSIZ) < 2000000)
+final_data <- bind_rows(
+  final_data,
+  final_data %>% filter(year == 2012) %>%
+    mutate(dummy_year = 0)
+)
+
+diff_data <- diff_data %>% filter(year_diff != "2018-2008") %>% filter(abs(diff_CBC_MSIZ) < 20000000)
 
 col_to_group <- "diff_perc_CBC_MSIZ"
 treatment_group_names <- c("very_negative", "negative", "positive", "very_positive")
-threshold_vector <- c(-0.1, -0.005, 0.005, 0.1)
+threshold_vector <- c(-0.1, -0.01, 0.01, 0.1)
 
 grouped_diff_data <- create_groups(diff_data, col_to_group, threshold_vector, treatment_group_names)
 
 joined_data <- final_data %>% 
-  left_join(grouped_diff_data, by=c("site", "alt", "group", "longitude", "latitude")) 
+  left_join(grouped_diff_data, by=c("site", "alt", "group", "longitude", "latitude", "year"="year_i"))
 
-x_controls <- c("temperature_moyenne24h", "precipitation_somme24h", "radiation_somme24h", "alt", "latitude")
+joined_data$year_diff <- as.factor(joined_data$year_diff)
+
+x_controls <- c("temperature_moyenne24h", "precipitation_somme24h", "radiation_somme24h", "alt", "latitude", "year_diff")
 y <- "Total_Abundance_woodland"
 dum_y <- "dummy_year"
 
