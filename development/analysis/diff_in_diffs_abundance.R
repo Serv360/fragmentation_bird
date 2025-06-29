@@ -10,9 +10,9 @@ create_groups <- function(data, col_to_group1, col_to_group2, threshold_vector, 
       !!sym(col_to_group1) < threshold_vector[1] & !!sym(col_to_group2) < threshold_connectivity  ~ treatment_group_names[1],  # < -0.1
       !!sym(col_to_group1) > threshold_vector[2] & !!sym(col_to_group2) < threshold_connectivity ~ treatment_group_names[2],
       !!sym(col_to_group2) < threshold_connectivity ~ treatment_group_names[3],
-      !!sym(col_to_group1) > threshold_vector[1] & !!sym(col_to_group2) > threshold_connectivity ~ treatment_group_names[4],
-      !!sym(col_to_group1) < threshold_vector[2] & !!sym(col_to_group2) > threshold_connectivity ~ treatment_group_names[5],
-      TRUE ~ treatment_group_names[6]  # Outside all defined ranges
+      !!sym(col_to_group1) < threshold_vector[1] & !!sym(col_to_group2) >= threshold_connectivity ~ treatment_group_names[4],
+      !!sym(col_to_group1) > threshold_vector[2] & !!sym(col_to_group2) >= threshold_connectivity ~ treatment_group_names[5],
+      !!sym(col_to_group2) >= threshold_connectivity ~ treatment_group_names[6]  # Outside all defined ranges
     ))
   print(col_to_group1)
   for (treatment_group_name in treatment_group_names) {
@@ -53,15 +53,15 @@ final_data <- final_data %>% filter(year != 2012) %>% filter(perc4 < 0.2) %>%
     mutate(dummy_year = ifelse(year == 2008, 0,
                                ifelse(year == 2018, 1, NA)))
 
-diff_data <- diff_data %>% filter(year_diff == "2018-2008") %>% filter(abs(diff_CBC_MSIZ) < 2000000) %>%
-  left_join(final_data, by=c("site", "alt", "group", "longitude", "latitude", "year_i"="year")) %>%
+diff_data <- diff_data %>% filter(year_diff == "2018-2008") %>% filter(abs(diff_CBC_MSIZ) < 500000) %>%
+  inner_join(final_data, by=c("site", "alt", "group", "longitude", "latitude", "year_i"="year")) %>%
   select(c("site", "alt", "group", "longitude", "latitude", "year_i", "diff_CBC_MSIZ", "CBC_MSIZ", "diff_MSIZ", "MSIZ"))
 
 col_to_group1 <- "diff_CBC_MSIZ"
 col_to_group2 <- "CBC_MSIZ"
 treatment_group_names <- c("low_conn_neg_diff", "low_conn_pos_diff", "low_conn_control", "high_conn_neg_diff", "high_conn_pos_diff", "high_conn_control")
 threshold_vector <- c(-10000, 10000)
-threshold_connectivity <- 1000000
+threshold_connectivity <- 600000
 
 grouped_diff_data <- create_groups(diff_data, col_to_group1, col_to_group2, threshold_vector, threshold_connectivity, treatment_group_names)
 
