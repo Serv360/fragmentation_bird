@@ -57,6 +57,7 @@ def load_data(bird_indic_path, bird_data_folder, habitat_folder, climate_path,
         fragmentation_year["year"] = year_STOC
         fragmentations_list.append(fragmentation_year)
     fragmentation_data = pd.concat(fragmentations_list, ignore_index=True)
+    fragmentation_data["CBC_MSIZ_share"] = fragmentation_data["CBC_MSIZ"] / (np.pi*5000**2) # buffer of 5000!
 
     # Load habitat
     habitats_list = []
@@ -107,22 +108,22 @@ def build_difference_dataset(final_data_folder, output_folder, version):
 #=====# Global variables #=====#
 
 # MERGE THE DATASETS
-# bird_indic_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/div_indicators/indicators.csv"
-# habitat_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/control_variables/habitat"
-# climate_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/control_variables/climate/climate_controls.csv"
-# fragmentation_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/results"
-# agric_path = None
-# output_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/merged_data"
-# bird_data_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC"
-# years_STOC = [2008, 2012, 2018]
-# years_clc = [2006, 2012, 2018]
-# year_clc_to_STOC = {2006:2008, 2012:2012, 2018:2018}
-# version = "all_three"
+bird_indic_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/div_indicators/indicators.csv"
+habitat_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/control_variables/habitat"
+climate_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/control_variables/climate/climate_controls.csv"
+fragmentation_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/results"
+agric_path = None
+output_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/merged_data"
+bird_data_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC"
+years_STOC = [2008, 2012, 2018]
+years_clc = [2006, 2012, 2018]
+year_clc_to_STOC = {2006:2008, 2012:2012, 2018:2018}
+version = "all_three"
 
-# indicator_data, bird_geo_data, habitat_data, climate_data, fragmentation_data, agric_data = load_data(
-#     bird_indic_path, bird_data_folder, habitat_folder, climate_path, fragmentation_folder, agric_path, years_clc, years_STOC, year_clc_to_STOC, version
-# )
-# merge(indicator_data, bird_geo_data, habitat_data, climate_data, fragmentation_data, agric_data, output_folder, version)
+indicator_data, bird_geo_data, habitat_data, climate_data, fragmentation_data, agric_data = load_data(
+    bird_indic_path, bird_data_folder, habitat_folder, climate_path, fragmentation_folder, agric_path, years_clc, years_STOC, year_clc_to_STOC, version
+)
+merge(indicator_data, bird_geo_data, habitat_data, climate_data, fragmentation_data, agric_data, output_folder, version)
 
 
 # CONSTRUCT THE DIFFERENCE DATASET
