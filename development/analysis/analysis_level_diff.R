@@ -116,6 +116,7 @@ plot_forest_by_category_pretty <- function(data,
     facet_grid(predictor ~ metric, scales = "free_y", space = "free_y") +
     geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
     scale_color_brewer(palette = "Set2") +
+    scale_x_continuous(breaks = c(-0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3)) +
     labs(
       title = "Regression Coefficients (with 95% CI)",
       subtitle = "Grouped by Metric and Biodiversity Index",
@@ -180,32 +181,32 @@ diff_data <- read_csv(diff_path)
 
 # ================================================ #
 
-# y <- "Total_Abundance_woodland"
-# x <- "COH"
-# x2 <- "truc"
-# x_controls <- c("temperature_moyenne24h", "precipitation_somme24h", "radiation_somme24h", "alt", "latitude")
-# col_to_stand <- c(x_controls, y, x)
-# 
-# # final_data <- final_data %>%
-# #   mutate(across(c(x_controls, y, x), scale))
-# # final_data <- final_data %>% filter(year!=2012)
-# # final_data <- final_data %>% filter(perc4 < 0.2) %>%
-# #   mutate(dummy_year = ifelse(year == 2008, 0,
-# #                              ifelse(year == 2018, 1, NA))) %>%
-# #   filter(abs(MSIZ) < 4000000)
-# 
-# final_data <- final_data %>% mutate(COH = COH*100) %>% 
-#   mutate(CBC_MSIZ_share = CBC_MSIZ_share*100) %>%
-#   filter(perc4 < 0.2)
-# 
-# result <- regression_table_long(final_data, y, x, x2, x_controls, col_to_stand, interaction = FALSE, standardise = TRUE, square=TRUE)
-# 
-# #summary(result)
-# # Clustered standard errors by a column (e.g., cluster_id)
-# cl_vcov <- vcovCL(result, cluster = ~site)
-# 
-# # Print model summary with clustered SEs
-# coeftest(result, vcov. = cl_vcov)
+y <- "Total_Abundance_woodland"
+x <- "COH"
+x2 <- "truc"
+x_controls <- c("temperature_moyenne24h", "precipitation_somme24h", "radiation_somme24h", "alt", "latitude")
+col_to_stand <- c(x_controls, y, x)
+
+# final_data <- final_data %>%
+#   mutate(across(c(x_controls, y, x), scale))
+# final_data <- final_data %>% filter(year!=2012)
+# final_data <- final_data %>% filter(perc4 < 0.2) %>%
+#   mutate(dummy_year = ifelse(year == 2008, 0,
+#                              ifelse(year == 2018, 1, NA))) %>%
+#   filter(abs(MSIZ) < 4000000)
+
+final_data <- final_data %>% mutate(COH = COH*100) %>%
+  mutate(CBC_MSIZ_share = CBC_MSIZ_share*100) %>%
+  filter(perc4 < 0.2)
+
+result <- regression_table_long(final_data, y, x, x2, x_controls, col_to_stand, interaction = FALSE, standardise = FALSE, square=TRUE)
+
+#summary(result)
+# Clustered standard errors by a column (e.g., cluster_id)
+cl_vcov <- vcovCL(result, cluster = ~site)
+
+# Print model summary with clustered SEs
+coeftest(result, vcov. = cl_vcov)
 
 
 # ================================================ #
@@ -228,30 +229,30 @@ diff_data <- read_csv(diff_path)
 
 # ================================================ #
 
-diff_data <- diff_data %>% filter(year_diff=="2018-2008")
-diff_data <- diff_data %>%
-  left_join(final_data, by=c("site", "alt", "group", "longitude", "latitude", "year_i"="year")) %>%
-    filter(perc4 < 0.2) %>% filter(abs(diff_MSIZ)<500000) #%>% filter(MSIZ<1000000)
-print(diff_data %>% count())
-
-x_diffs <- c("diff_COH", "diff_CBC_MSIZ_share", "diff_perc1", "diff_perc2", "diff_perc3")
-x_names <- c("diff_COH", "diff_COH CBC", "diff_urban", "diff_agri", "diff_woodland")
-names(x_names) <- x_diffs
-#y_diffs_woodland <- c("diff_Total_Abundance_woodland", "diff_Species_Richness_woodland", "diff_Simpson_Diversity_woodland", "diff_Shannon_Diversity_woodland")
-y_diffs <- c("diff_Total_Abundance", "diff_Species_Richness", "diff_Shannon_Diversity", "diff_Simpson_Diversity")
-bird_categories <- c("woodland", "urban", "farmland", "generalist", "all")
-x_controls <- c("temperature_moyenne24h", "precipitation_somme24h", "radiation_somme24h", "alt", "latitude")
-
-plot_forest_by_category_pretty(
-  data = diff_data,
-  x_diffs = x_diffs,
-  y_base_names = y_diffs,
-  bird_categories = bird_categories,
-  x_controls = x_controls,
-  x_names = x_names,
-  interaction = FALSE,
-  standardise = TRUE
-)
+# diff_data <- diff_data %>% filter(year_diff=="2018-2008")
+# diff_data <- diff_data %>%
+#   left_join(final_data, by=c("site", "alt", "group", "longitude", "latitude", "year_i"="year")) %>%
+#     filter(perc4 < 0.2) %>% filter(abs(diff_MSIZ)<500000) #%>% filter(MSIZ<1000000)
+# print(diff_data %>% count())
+# 
+# x_diffs <- c("diff_COH", "diff_CBC_MSIZ_share", "diff_perc1", "diff_perc2", "diff_perc3")
+# x_names <- c("diff_COH", "diff_COH CBC", "diff_urban", "diff_agri", "diff_woodland")
+# names(x_names) <- x_diffs
+# #y_diffs_woodland <- c("diff_Total_Abundance_woodland", "diff_Species_Richness_woodland", "diff_Simpson_Diversity_woodland", "diff_Shannon_Diversity_woodland")
+# y_diffs <- c("diff_Total_Abundance", "diff_Species_Richness", "diff_Shannon_Diversity", "diff_Simpson_Diversity")
+# bird_categories <- c("woodland", "urban", "farmland", "generalist", "all")
+# x_controls <- c("temperature_moyenne24h", "precipitation_somme24h", "radiation_somme24h", "alt", "latitude")
+# 
+# plot_forest_by_category_pretty(
+#   data = diff_data,
+#   x_diffs = x_diffs,
+#   y_base_names = y_diffs,
+#   bird_categories = bird_categories,
+#   x_controls = x_controls,
+#   x_names = x_names,
+#   interaction = FALSE,
+#   standardise = TRUE
+# )
 
 
 # ================================================ #
