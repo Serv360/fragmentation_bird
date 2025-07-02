@@ -13,7 +13,7 @@ final_data <- final_data %>% mutate(COH = COH*100) %>%
                              mutate(CBC_MSIZ_share = CBC_MSIZ_share*100) %>%
               filter(perc4 < 0.2) %>% filter(Total_Abundance_all < 600)
 
-category <- "all" # all # farmland # generalist # urban
+category <- "urban" # all # farmland # generalist # urban
 
 # Define variables
 x_vars <- c("COH", "CBC_MSIZ_share", "perc1", "perc2", "perc3")  # Extend this list as needed
@@ -50,7 +50,7 @@ make_segmented_plot <- function(data, x_var, y_var, x_names, y_names, bottom=TRU
   }
   
   p <- ggplot(df, aes(x = x, y = y)) +
-    geom_point(alpha = 0.6) +
+    geom_point(alpha = 0.6, size=0.5) +
     labs(title =  " ", x = label_x, y = label_y) +
     theme_minimal()
   
