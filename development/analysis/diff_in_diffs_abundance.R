@@ -55,13 +55,14 @@ final_data <- final_data %>% filter(year != 2012) %>% filter(perc4 < 0.2) %>%
 
 diff_data <- diff_data %>% filter(year_diff == "2018-2008") %>% filter(abs(diff_CBC_MSIZ) < 500000) %>%
   inner_join(final_data, by=c("site", "alt", "group", "longitude", "latitude", "year_i"="year")) %>%
-  select(c("site", "alt", "group", "longitude", "latitude", "year_i", "diff_CBC_MSIZ", "CBC_MSIZ", "diff_MSIZ", "MSIZ"))
+  select(c("site", "alt", "group", "longitude", "latitude", "year_i", "diff_CBC_MSIZ_share", "CBC_MSIZ_share", "diff_COH", "COH")) %>%
+  mutate(across(c(COH, diff_COH, diff_CBC_MSIZ_share, CBC_MSIZ_share), ~ .x * 100))
 
-col_to_group1 <- "diff_CBC_MSIZ"
-col_to_group2 <- "CBC_MSIZ"
+col_to_group1 <- "diff_COH"
+col_to_group2 <- "COH"
 treatment_group_names <- c("low_conn_neg_diff", "low_conn_pos_diff", "low_conn_control", "high_conn_neg_diff", "high_conn_pos_diff", "high_conn_control")
-threshold_vector <- c(-10000, 10000)
-threshold_connectivity <- 600000
+threshold_vector <- c(-0.1, 0.1)
+threshold_connectivity <- 1
 
 grouped_diff_data <- create_groups(diff_data, col_to_group1, col_to_group2, threshold_vector, threshold_connectivity, treatment_group_names)
 
