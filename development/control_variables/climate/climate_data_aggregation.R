@@ -1,4 +1,3 @@
-library(terra)
 library(tidyverse)
 library(ncdf4)
 library(readr)
@@ -8,7 +7,6 @@ library(dplyr)
 
 # Climate data was downloaded by hand with macros from the Copernicus website.
 # It would be more relevant to use an API (package cdsapi with python e.g.).
-# A query example is provided in the development folder.
 
 #=====# Functions #=====#
 

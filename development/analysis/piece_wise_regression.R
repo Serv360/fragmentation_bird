@@ -6,15 +6,16 @@ library(segmented)
 library(grid)
 library(gridExtra)
 library(scales)
+library(purrr)
 
 # Load your dataset
 final_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/merged_data/final_data_all_three.csv"
 final_data <- read_csv(final_path)
 final_data <- final_data %>% mutate(COH = COH*100) %>% 
                              mutate(CBC_MSIZ_share = CBC_MSIZ_share*100) %>%
-              filter(perc4 < 20) %>% filter(Total_Abundance_all < 600)
+              filter(perc4 < 20) #%>% filter(Total_Abundance_all < 600)
 
-category <- "generalist" # all # farmland # generalist # urban
+category <- "all" # all # farmland # generalist # urban
 
 # Define variables
 x_vars <- c("COH", "CBC_MSIZ_share", "perc1", "perc2", "perc3")  # Extend this list as needed
@@ -115,6 +116,25 @@ breakpoints_df <- data.frame(
   breakpoint = unlist(breakpoints_list)
 )
 
+
+count_sites <- function(x_var, breakpoint) {
+  # Extract the column by name
+  values <- final_data[[x_var]]
+  n_below <- sum(values < breakpoint, na.rm = TRUE)
+  n_above <- sum(values >= breakpoint, na.rm = TRUE)
+  return(c(n_below = n_below, n_above = n_above))
+}
+
+# Apply rowwise using purrr::pmap
+breakpoints_df <- breakpoints_df %>%
+  mutate(
+    counts = pmap(list(x_var, breakpoint), count_sites),
+    n_below = map_int(counts, 1),
+    n_above = map_int(counts, 2)
+  ) %>%
+  dplyr::select(-counts)  # Remove the temporary list column
+
+# View updated DataFrame
 print(breakpoints_df)
 
-write.csv(breakpoints_df, paste0("C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/results/threshold_", category, ".csv"), row.names = FALSE)
+#write.csv(breakpoints_df, paste0("C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/results/threshold_", category, ".csv"), row.names = FALSE)
