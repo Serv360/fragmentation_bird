@@ -78,11 +78,11 @@ sites_to_keep_two_out_of_three_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3
 # create_layer(merged_buffer, esri_format=False)
 
 # ASSIGN GROUPS TWO OUT OF THREE
-output_path_sites_with_group_two_out_of_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_with_group_two_out_of_three_5000.csv"
-sites_to_keep = get_sites_to_keep(sites_to_keep_two_out_of_three_path)
-print(len(sites_to_keep))
-sites_with_group = partition(sites_to_keep, 5000)
-write_df(sites_with_group, output_path_sites_with_group_two_out_of_three)
+# output_path_sites_with_group_two_out_of_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_with_group_two_out_of_three_5000.csv"
+# sites_to_keep = get_sites_to_keep(sites_to_keep_two_out_of_three_path)
+# print(len(sites_to_keep))
+# sites_with_group = partition(sites_to_keep, 5000)
+# write_df(sites_with_group, output_path_sites_with_group_two_out_of_three)
 
 # ASSIGN GROUPS ALL THREE
 # output_path_sites_with_group_all_three = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_with_group_all_three_5000.csv"
