@@ -64,7 +64,7 @@ To produce land cover percentages, one should run the python file in control_var
 
 To merge all the dataset created in the relevant folders in the main data folder, one should use the main_merge.py file in the merge folder.
 
-At the end, one obtains two dataset, final_data, which contains absolute values of each variable and difference_data, which contains differences of these variables for all couples of two years among 2008, 2012 and 2018. These datasets are stored in main_path/data/merged_data.
+At the end, one obtains two datasets, final_data, which contains absolute values of each variable and difference_data, which contains differences of these variables for all couples of two years among 2008, 2012 and 2018. These datasets are stored in main_path/data/merged_data.
 
 ### Analysis
 
