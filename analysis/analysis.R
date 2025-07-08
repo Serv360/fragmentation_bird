@@ -1,8 +1,21 @@
-# Load libraries
+# ================================================ #
+# ================== Packages ==================== #
+# ================================================ #
+
 library(tidyverse)
 library(broom)
 library(kableExtra)
 library(knitr)
+
+# ================================================ #
+# ================= Main path ==================== #
+# ================================================ #
+
+main_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP"
+
+# ================================================ #
+# ================= Functions ==================== #
+# ================================================ #
 
 graph_deviation <- function (y, predictors, data, pretty_names, standardise=TRUE) {
   if (standardise){
@@ -143,14 +156,15 @@ table_deviation <- function(y, predictors, data, pretty_names, standardise = TRU
   }
 }
 
-
-
+# ================================================ #
+# ==================== Call ====================== #
+# ================================================ #
 
 # Read the data
-diff_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/merged_data/difference_data_all_three.csv"
-final_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/merged_data/final_data_all_three.csv"
-final_data <- read_csv(final_path)
+diff_path <- paste0(main_path, "/data/merged_data/difference_data_all_three.csv")
 diff_data <- read_csv(diff_path)
+final_path <- paste0(main_path, "/data/merged_data/final_data_all_three.csv")
+final_data <- read_csv(final_path)
 
 
 

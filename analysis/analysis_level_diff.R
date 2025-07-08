@@ -1,10 +1,21 @@
-# Install required packages if not already installed
+# ================================================ #
+# ================== Packages ==================== #
+# ================================================ #
 
-# Load packages
 library(tidyverse)
 library(dplyr)
 library(lmtest)
 library(sandwich)
+
+# ================================================ #
+# ================= Main path ==================== #
+# ================================================ #
+
+main_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP"
+
+# ================================================ #
+# ================= Functions ==================== #
+# ================================================ #
 
 # Function to regress y on x and produce a clean table
 regression_table_long <- function(data, y, x, x2, x_controls, col_to_stand, interaction=FALSE, standardise=TRUE, square=FALSE) {
@@ -231,11 +242,22 @@ regression_table_double <- function(data, y, x, x2, x_controls, col_to_stand, in
   coeftest(model, vcov. = cl_vcov)
 }
 
+# ================================================ #
+# ============= Global variables ================= #
+# ================================================ #
+
+
 # Read the data
-diff_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/merged_data/difference_data_all_three.csv"
-final_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/merged_data/final_data_all_three.csv"
-final_data <- read_csv(final_path)
+diff_path <- paste0(main_path, "/data/merged_data/difference_data_all_three.csv")
 diff_data <- read_csv(diff_path)
+final_path <- paste0(main_path, "/data/merged_data/final_data_all_three.csv")
+final_data <- read_csv(final_path)
+
+# ================================================ #
+# ==================== Calls ===================== #
+# ================================================ #
+
+# Calls should be uncommented one at a time.
 
 # ================================================ #
 

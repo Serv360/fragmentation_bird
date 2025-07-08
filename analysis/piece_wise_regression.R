@@ -1,4 +1,7 @@
-# Load required libraries
+# ================================================ #
+# ================== Packages ==================== #
+# ================================================ #
+
 library(readr)
 library(dplyr)
 library(ggplot2)
@@ -8,28 +11,17 @@ library(gridExtra)
 library(scales)
 library(purrr)
 
-# Load your dataset
-final_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/merged_data/final_data_all_three.csv"
-final_data <- read_csv(final_path)
-final_data <- final_data %>% mutate(COH = COH*100) %>% 
-                             mutate(CBC_MSIZ_share = CBC_MSIZ_share*100) %>%
-              filter(perc4 < 20) #%>% filter(Total_Abundance_all < 600)
+# ================================================ #
+# ================= Main path ==================== #
+# ================================================ #
 
-category <- "woodland" # all # farmland # generalist # urban
+main_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP"
 
-# Define variables
-x_vars <- c("COH", "CBC_MSIZ_share", "perc1", "perc2", "perc3")  # Extend this list as needed
-x_names <- c("coherence (%)", "coherence with CBC  (%)", "urban percentage  (%)", "agri percentage  (%)", "woodland percentage  (%)")
-y_vars <- paste0(c("Total_Abundance", "Species_Richness", 
-            "Shannon_Diversity", "Simpson_Diversity"), "_", category)
-y_names <- c("Total Abundance", "Species Richness", 
-            "Shannon Diversity", "Simpson Diversity")
-names(x_names) <- x_vars
-names(y_names) <- y_vars
+# ================================================ #
+# ================= Functions ==================== #
+# ================================================ #
 
 
-
-# Plotting function
 make_segmented_plot <- function(data, x_var, y_var, x_names, y_names, bottom=TRUE, left=TRUE, color_number=1) {
   df <- data %>% dplyr::select(site, year, all_of(x_var), all_of(y_var)) %>% na.omit
   names(df)[3:4] <- c("x", "y")
@@ -81,6 +73,28 @@ make_segmented_plot <- function(data, x_var, y_var, x_names, y_names, bottom=TRU
   
   return(list(plot = p, breakpoint = bp))
 }
+
+# ================================================ #
+# ==================== Call ====================== #
+# ================================================ #
+
+final_path <- paste0(main_path, "/data/merged_data/final_data_all_three.csv")
+final_data <- read_csv(final_path)
+final_data <- final_data %>% mutate(COH = COH*100) %>% 
+  mutate(CBC_MSIZ_share = CBC_MSIZ_share*100) %>%
+  filter(perc4 < 20) #%>% filter(Total_Abundance_all < 600) #This filter is used to better see for urban birds
+
+category <- "woodland" # all # farmland # generalist # urban
+
+# Define variables
+x_vars <- c("COH", "CBC_MSIZ_share", "perc1", "perc2", "perc3")  # Extend this list as needed
+x_names <- c("coherence (%)", "coherence with CBC  (%)", "urban percentage  (%)", "agri percentage  (%)", "woodland percentage  (%)")
+y_vars <- paste0(c("Total_Abundance", "Species_Richness", 
+                   "Shannon_Diversity", "Simpson_Diversity"), "_", category)
+y_names <- c("Total Abundance", "Species Richness", 
+             "Shannon Diversity", "Simpson Diversity")
+names(x_names) <- x_vars
+names(y_names) <- y_vars
 
 # Create plot list in correct order: rows = y_vars, columns = x_vars
 plot_grid <- list()

@@ -1,7 +1,21 @@
+# ================================================ #
+# ================== Packages ==================== #
+# ================================================ #
 
 library(tidyverse)
 library(dplyr)
 library(rlang)
+
+# ================================================ #
+# ================= Main path ==================== #
+# ================================================ #
+
+main_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP"
+
+# ================================================ #
+# ================= Functions ==================== #
+# ================================================ #
+
 
 create_groups <- function(data, col_to_group, threshold_vector, treatment_group_names) {
   
@@ -42,10 +56,13 @@ run_diffindiffs <- function(data, y, dum_y, dummy_groups, x_controls, col_to_sta
   summary(model)
 }
 
+# ================================================ #
+# ==================== Call ====================== #
+# ================================================ #
 
-diff_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/merged_data/difference_data_all_three.csv"
+diff_path <- paste0(main_path, "/data/merged_data/difference_data_all_three.csv")
 diff_data <- read_csv(diff_path)
-final_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/merged_data/final_data_all_three.csv"
+final_path <- paste0(main_path, "/data/merged_data/final_data_all_three.csv")
 final_data <- read_csv(final_path)
 
 final_data <- final_data %>% filter(year != 2012) %>% filter(perc4 < 0.2) %>%
