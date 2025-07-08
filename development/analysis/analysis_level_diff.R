@@ -242,7 +242,7 @@ diff_data <- read_csv(diff_path)
 # y <- "Total_Abundance_woodland"
 # x <- "COH"
 # x2 <- "truc"
-# x_controls <- c("temperature_moyenne24h", "precipitation_somme24h", "radiation_somme24h", "alt", "latitude")
+# x_controls <- c("perc3", "temperature_moyenne24h", "precipitation_somme24h", "radiation_somme24h", "alt", "latitude")
 # col_to_stand <- c(x_controls, y, x)
 # 
 # # final_data <- final_data %>%
@@ -255,9 +255,9 @@ diff_data <- read_csv(diff_path)
 # 
 # final_data <- final_data %>% mutate(COH = COH*100) %>%
 #   mutate(CBC_MSIZ_share = CBC_MSIZ_share*100) %>%
-#   filter(perc4 < 0.2) %>% filter()
+#   filter(perc4 < 20) %>% filter(perc3<25)
 # 
-# result <- regression_table_long(final_data, y, x, x2, x_controls, col_to_stand, interaction = FALSE, standardise = FALSE, square=TRUE)
+# result <- regression_table_long(final_data, y, x, x2, x_controls, col_to_stand, interaction = FALSE, standardise = TRUE, square=FALSE)
 # 
 # #summary(result)
 # # Clustered standard errors by a column (e.g., cluster_id)
@@ -327,7 +327,7 @@ x_names <- c("diff_COH", "diff_COH CBC", "diff_urban", "diff_agri", "diff_woodla
 names(x_names) <- x_diffs
 #y_diffs_woodland <- c("diff_Total_Abundance_woodland", "diff_Species_Richness_woodland", "diff_Simpson_Diversity_woodland", "diff_Shannon_Diversity_woodland")
 y_diffs <- c("diff_Total_Abundance", "diff_Species_Richness", "diff_Shannon_Diversity", "diff_Simpson_Diversity")
-bird_categories <- c("woodland", "urban", "farmland", "generalist", "all")
+bird_categories <- c("woodland", "all")
 x_controls <- c("temperature_moyenne24h", "precipitation_somme24h", "radiation_somme24h", "alt", "latitude")
 
 base_path_thresh <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/results"

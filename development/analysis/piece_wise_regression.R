@@ -15,7 +15,7 @@ final_data <- final_data %>% mutate(COH = COH*100) %>%
                              mutate(CBC_MSIZ_share = CBC_MSIZ_share*100) %>%
               filter(perc4 < 20) #%>% filter(Total_Abundance_all < 600)
 
-category <- "all" # all # farmland # generalist # urban
+category <- "woodland" # all # farmland # generalist # urban
 
 # Define variables
 x_vars <- c("COH", "CBC_MSIZ_share", "perc1", "perc2", "perc3")  # Extend this list as needed
