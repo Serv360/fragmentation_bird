@@ -1,0 +1,7 @@
+requests
+geopandas
+shapely
+pyproj
+json
+copy
+qgis

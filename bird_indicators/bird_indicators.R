@@ -1,6 +1,20 @@
+# ================================================ #
+# ================== Packages ==================== #
+# ================================================ #
+
 library(vegan)  # for diversity metrics
 library(tidyverse)
 library(dplyr)
+
+# ================================================ #
+# ================= Main path ==================== #
+# ================================================ #
+
+main_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP"
+
+# ================================================ #
+# ================= Functions ==================== #
+# ================================================ #
 
 compute_category_indicators <- function(bird_data, traits_data) {
   # Merge bird abundance data with trait info
@@ -73,9 +87,13 @@ write_results <- function(indicators, output_path) {
   write.csv(indicators, output_path, row.names = FALSE)
 } 
 
-bird_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/countingdata_2007_2023.csv"
-species_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/species_stoc.csv"
-output_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/div_indicators/indicators.csv"
+# ================================================ #
+# ==================== Call ====================== #
+# ================================================ #
+
+bird_path <- paste0(main_path, "/data/biodiversity/STOC/countingdata_2007_2023.csv")
+species_path <- paste0(main_path, "/data/biodiversity/STOC/species_stoc.csv")
+output_path <- paste0(main_path, "/data/biodiversity/div_indicators/indicators.csv")
 
 full_data <- load_data(bird_path, species_path)
 bird_data <- full_data$bird

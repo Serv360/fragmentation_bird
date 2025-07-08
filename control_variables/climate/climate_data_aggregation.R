@@ -1,7 +1,22 @@
+# ================================================ #
+# ================== Packages ==================== #
+# ================================================ #
+
 library(tidyverse)
 library(ncdf4)
 library(readr)
 library(dplyr)
+
+# ================================================ #
+# ================= Main path ==================== #
+# ================================================ #
+
+main_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP"
+data_climate_path <- "C:/Users/Serv3/Desktop/INSEE ENSAE/Cours/DSSS project"
+
+# ================================================ #
+# ================= Functions ==================== #
+# ================================================ #
 
 #=====# Climate data information #=====#
 
@@ -127,9 +142,10 @@ write_climate_annual_data <- function(climate_tibble, output_path) {
   readr::write_csv(climate_tibble, output_path)
 }
 
-#=====# Global variables #=====#
+# ================================================ #
+# ==================== Call ====================== #
+# ================================================ #
 
-data_climate_path <- "C:/Users/Serv3/Desktop/INSEE ENSAE/Cours/DSSS project"
 var_clims = list("temperature_moyenne24h", "precipitation_somme24h", "radiation_somme24h")
 years = seq(2008, 2022)
 corresp_var_clim = list("temperature_moyenne24h" = "Temperature_Air_2m_Mean_24h", 

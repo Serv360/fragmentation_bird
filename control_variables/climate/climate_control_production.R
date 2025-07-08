@@ -1,9 +1,21 @@
+# ================================================ #
+# ================== Packages ==================== #
+# ================================================ #
+
 library(tidyverse)
 library(dplyr)
 library(readr)
 library(tidyr)
 
-#=====# Functions #=====#
+# ================================================ #
+# ================= Main path ==================== #
+# ================================================ #
+
+main_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP"
+
+# ================================================ #
+# ================= Functions ==================== #
+# ================================================ #
 
 create_climate_controls <- function(climate_data, bird_data) {
   bird_data$lat10 <- as.integer(round(bird_data$latitude*10)) #On transforme les lat/lon 
@@ -46,11 +58,13 @@ write_climate_controls <- function(climate_controls, output_path) {
   readr::write_csv(climate_controls, output_path)
 }
 
-#=====# Global variables #=====#
+# ================================================ #
+# ==================== Call ====================== #
+# ================================================ #
 
-bird_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/countingdata_2007_2023.csv"
-climate_data_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/control_variables/climate/climate_data.csv"
-output_path <- "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/control_variables/climate/climate_controls.csv"
+bird_path <- paste0(main_path, "/data/biodiversity/STOC/countingdata_2007_2023.csv")
+climate_data_path <- paste0(main_path, "/data/control_variables/climate/climate_data.csv")
+output_path <- paste0(main_path, "/data/control_variables/climate/climate_controls.csv")
 
 climate_data <- load_climate_data(climate_data_path)
 bird_data <- load_bird_data(bird_path)
