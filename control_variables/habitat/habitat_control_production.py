@@ -8,6 +8,12 @@ from math import ceil
 from shapely.validation import make_valid
 import numpy as np
 
+# ================================================ #
+# ================= Main path ==================== #
+# ================================================ #
+
+main_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP"
+
 #=====# Functions #=====#
 
 def compute_cover_perc_point(clc_gdf, point, data_clc_path, clc_to_category_file, year, buffer_size):
@@ -115,8 +121,8 @@ def get_bird_points(file_path, year, all_years=False):
 
 #=====# Global variables #=====#
 
-bird_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/countingdata_2007_2023.csv"
-data_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data"
+bird_path = main_path + "/data/biodiversity/STOC/countingdata_2007_2023.csv"
+data_path = main_path + "/data"
 path_clc = "/land_cover/corine_land_cover"
 habitat_path = "/control_variables/habitat"
 clc_to_category_file = data_path + "/land_cover/corres_clc_cat.csv"

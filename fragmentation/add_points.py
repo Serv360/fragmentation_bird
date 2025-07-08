@@ -6,11 +6,16 @@ from recover_frag_index import results_to_csv
 
 from get_points import get_sites_to_keep
 
+# ================================================ #
+# ================= Main path ==================== #
+# ================================================ #
 
-sites_to_keep_all_three_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_to_keep_all_three.csv"
+main_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP"
+
+sites_to_keep_all_three_path = main_path + "/data/biodiversity/STOC/sites_to_keep_all_three.csv"
 sites_to_keep_at = get_sites_to_keep(sites_to_keep_all_three_path)
 
-sites_to_keep_two_out_of_three_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC/sites_to_keep_two_out_of_three.csv"
+sites_to_keep_two_out_of_three_path = main_path + "/data/biodiversity/STOC/sites_to_keep_two_out_of_three.csv"
 sites_to_keep_toot = get_sites_to_keep(sites_to_keep_two_out_of_three_path)
 
 #print(sites_to_keep_toot.groupby("site").count())

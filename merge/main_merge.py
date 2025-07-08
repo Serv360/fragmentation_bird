@@ -1,6 +1,12 @@
 import pandas as pd
 import numpy as np
 
+# ================================================ #
+# ================= Main path ==================== #
+# ================================================ #
+
+main_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP"
+
 #=====# Functions #=====#
 
 def merge(bird_indicators, bird_geo_data, habitat_data, climate_data, fragmentation_data, agric_data, output_folder, version):
@@ -108,13 +114,13 @@ def build_difference_dataset(final_data_folder, output_folder, version):
 #=====# Global variables #=====#
 
 # MERGE THE DATASETS
-bird_indic_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/div_indicators/indicators.csv"
-habitat_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/control_variables/habitat"
-climate_path = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/control_variables/climate/climate_controls.csv"
-fragmentation_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/fragmentation/results"
+bird_indic_path = main_path + "/data/biodiversity/div_indicators/indicators.csv"
+habitat_folder = main_path + "/data/control_variables/habitat"
+climate_path = main_path + "/data/control_variables/climate/climate_controls.csv"
+fragmentation_folder = main_path + "/data/fragmentation/results"
 agric_path = None
-output_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/merged_data"
-bird_data_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/biodiversity/STOC"
+output_folder = main_path + "/data/merged_data"
+bird_data_folder = main_path + "/data/biodiversity/STOC"
 years_STOC = [2008, 2012, 2018]
 years_clc = [2006, 2012, 2018]
 year_clc_to_STOC = {2006:2008, 2012:2012, 2018:2018}
@@ -128,6 +134,6 @@ merge(indicator_data, bird_geo_data, habitat_data, climate_data, fragmentation_d
 
 # CONSTRUCT THE DIFFERENCE DATASET
 version = "all_three"
-final_data_folder = f"C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/merged_data"
-output_folder = "C:/Users/Serv3/Desktop/Cambridge/Course/3 Easter/Dissertation EP/data/merged_data"
+final_data_folder = main_path + "/data/merged_data"
+output_folder = main_path + "/data/merged_data"
 build_difference_dataset(final_data_folder, output_folder, version)
