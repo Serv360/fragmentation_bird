@@ -18,7 +18,7 @@ def create_dep_folder(base_folder):
         ['2A', '2B']  # Special Corsican codes
     )
 
-    # Optional: format numbers with leading zeros (e.g. '01', '02', ..., '09')
+    # Format numbers with leading zeros (e.g. '01', '02', ..., '09')
     departements = [d.zfill(2) if d.isdigit() else d for d in departements]
 
     # Create each folder
@@ -54,7 +54,7 @@ def merge_roads_rails(base_folder, year, output_path, file_path, layer_name="fra
         ['2A', '2B']  # Special Corsican codes
     )
 
-    # Optional: format numbers with leading zeros (e.g. '01', '02', ..., '09')
+    # Format numbers with leading zeros (e.g. '01', '02', ..., '09')
     departements = [d.zfill(2) if d.isdigit() else d for d in departements]
 
     all_gdfs = []
@@ -87,7 +87,7 @@ def merge_roads_rails(base_folder, year, output_path, file_path, layer_name="fra
     if verbose:print("Writing gpkg file.")
     # Save to GPKG
     merged.to_file(output_path, layer=layer_name, driver="GPKG")
-    print(f"✅ Merged shapefiles saved to {output_path}, layer: {layer_name}")
+    print(f"Merged shapefiles saved to {output_path}, layer: {layer_name}")
 
 
 #=====# Global variables #=====#

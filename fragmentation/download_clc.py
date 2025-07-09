@@ -147,12 +147,12 @@ def create_layer(given_shape, esri_format=True):
         geometry = Polygon(rings[0]) if len(rings) == 1 else MultiPolygon(rings)
     else:
         geometry=given_shape
-    # 2. Create GeoDataFrame with EPSG:3035
+    # Create GeoDataFrame with EPSG:3035
     gdf = gpd.GeoDataFrame(geometry=[geometry], crs="EPSG:3035")
-    # 3. Save to file
+    # Save to file
     temp_file = "temp_buffer_layer.gpkg"  # Adjust this path
     gdf.to_file(temp_file, layer="buffer_zone", driver="GPKG")
-    # 4. Load into QGIS (only works if run inside QGIS Python environment)
+    # Load into QGIS (only works if run inside QGIS Python environment)
     QGIS_PREFIX_PATH = "C:/Program Files/QGIS 3.34.14"
     QgsApplication.setPrefixPath(QGIS_PREFIX_PATH, True)
     qgs = QgsApplication([], False)
@@ -287,4 +287,4 @@ def merge_gpkg_files(input_folder, output_file, input_layer=None):
 
     # Save final file
     merged_gdf.to_file(output_file, driver="GPKG")
-    print(f"✅ Merged {len(gpkg_files)} files into '{output_file}' with {len(merged_gdf)} unique features.")
+    print(f"Merged {len(gpkg_files)} files into '{output_file}' with {len(merged_gdf)} unique features.")

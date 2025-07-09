@@ -146,7 +146,7 @@ breakpoints_df <- breakpoints_df %>%
     n_below = map_int(counts, 1),
     n_above = map_int(counts, 2)
   ) %>%
-  dplyr::select(-counts)  # Remove the temporary list column
+  dplyr::select(-counts)  # Remove the temporary list column # Care select functions from multiple packages
 
 # View updated DataFrame
 print(breakpoints_df)

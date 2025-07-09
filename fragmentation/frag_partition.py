@@ -21,7 +21,7 @@ def balanced_greedy_color(G):
             # Choose the color with the fewest nodes
             best_color = min(valid_colors, key=lambda c: len(color_groups[c]))
         else:
-            # No valid color → create a new one
+            # No valid color then create a new one
             best_color = len(color_groups)
 
         # Assign color

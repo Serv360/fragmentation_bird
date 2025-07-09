@@ -235,7 +235,7 @@ regression_table_double <- function(data, y, x, x2, x_controls, col_to_stand, in
   # Run linear model
   model <- lm(formula, data = data)
   
-  # Clustered standard errors by a column (e.g., cluster_id)
+  # Clustered standard errors by a column
   cl_vcov <- vcovCL(model, cluster = ~site)
   
   # Print model summary with clustered SEs

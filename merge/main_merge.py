@@ -89,15 +89,15 @@ def build_difference_dataset(final_data_folder, output_folder, version):
 
     merge_on = ["site", "group", "alt", "longitude", "latitude"]
 
-    # Step 1: Do a self-merge on site
+    # Do a self-merge on site
     merged = final_data.merge(final_data, on=merge_on, suffixes=('_j', '_i'))
 
-    # Step 2: Filter only where year_j > year_i
+    # Filter only where year_j > year_i
     merged = merged[merged['year_j'] > merged['year_i']]
 
     no_diff = merge_on + ["year"]
 
-    # Step 3: Compute differences
+    # Compute differences
     for col in final_data.columns:
         if col not in no_diff:
             merged[f'diff_{col}'] = merged[f'{col}_j'] - merged[f'{col}_i']
